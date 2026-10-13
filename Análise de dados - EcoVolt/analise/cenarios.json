@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "titulo": "Cenarios sinteticos declarados - Continuidade energetica com banco de 2a vida",
+    "grupo": "Grupo 6 - EcoVolt",
+    "aviso": "PARAMETROS ILUSTRATIVOS. Nao ha base operacional real de cargas criticas disponivel. Todos os valores de carga foram declarados pelo grupo com base em faixas publicas de equipamentos e devem ser tratados como hipotese, nao como medicao.",
+    "decisao": "Nas condicoes informadas, o cenario atende as cargas criticas durante o tempo requerido de interrupcao?"
+  },
+  "fatores_bateria": {
+    "fator_capacidade": {
+      "valor": 0.8,
+      "origem": "CALCE CS2 SOH (dados/processados/calce_cs2_soh.csv)",
+      "justificativa": "SOH de 2a vida adotado como 0,80 (limite tipico de reaproveitamento). O SOH NAO substitui ensaio de capacidade util; a curva de carga (curva_carga_5p596ah.csv) e a verificacao de capacidade (5,5872 Ah ~ 5,596 Ah nominais)."
+    },
+    "fracao_uso": {
+      "valor": 0.9,
+      "origem": "Premissa declarada (profundidade de descarga permitida do banco)",
+      "justificativa": "Fracao do Enominal utilizavel por ciclo (DoD de projeto)."
+    },
+    "eficiencia": {
+      "valor": 0.9,
+      "origem": "Premissa declarada (rendimento de ida e volta do inversor + bateria)",
+      "justificativa": "Perdas de conversao e internas."
+    }
+  },
+  "bancos": [
+    { "id": "A", "nome": "Banco 2a vida conservador", "Enominal_kWh": 5.0, "Pmax_kW": 1.0 },
+    { "id": "B", "nome": "Banco 2a vida expandido",  "Enominal_kWh": 10.0, "Pmax_kW": 3.0 }
+  ],
+  "cenarios": [
+    {
+      "id": "posto_vacinas",
+      "nome": "Sala de vacinas (posto de saude)",
+      "duracao_h": 8.0,
+      "cargas": [
+        { "equipamento": "Refrigerador de vacinas", "potencia_kW": 0.20, "qtd": 1 },
+        { "equipamento": "Iluminacao de emergencia", "potencia_kW": 0.05, "qtd": 4 },
+        { "equipamento": "Terminal + impressora", "potencia_kW": 0.10, "qtd": 1 }
+      ]
+    },
+    {
+      "id": "telecom_erb",
+      "nome": "Estacao radio-base (telecom)",
+      "duracao_h": 4.0,
+      "cargas": [
+        { "equipamento": "Transmissor/radio", "potencia_kW": 0.40, "qtd": 1 },
+        { "equipamento": "Ar-condicionado de emergencia", "potencia_kW": 0.80, "qtd": 1 }
+      ]
+    },
+    {
+      "id": "residencia_essencial",
+      "nome": "Residencia - circuito essencial",
+      "duracao_h": 6.0,
+      "cargas": [
+        { "equipamento": "Geladeira", "potencia_kW": 0.15, "qtd": 1 },
+        { "equipamento": "Bomba d'agua", "potencia_kW": 0.50, "qtd": 1 },
+        { "equipamento": "Iluminacao", "potencia_kW": 0.08, "qtd": 3 },
+        { "equipamento": "Roteador/internet", "potencia_kW": 0.02, "qtd": 1 }
+      ]
+    },
+    {
+      "id": "sem_carga_critica",
+      "nome": "Caso vazio - sem cargas criticas",
+      "duracao_h": 4.0,
+      "cargas": []
+    }
+  ]
+}

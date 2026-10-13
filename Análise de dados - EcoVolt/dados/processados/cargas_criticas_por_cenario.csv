@@ -1,0 +1,10 @@
+cenario_id,cenario,duracao_h,equipamento,potencia_kW,qtd,subtotal_kW
+posto_vacinas,Sala de vacinas (posto de saude),8.0,Refrigerador de vacinas,0.2,1,0.2
+posto_vacinas,Sala de vacinas (posto de saude),8.0,Iluminacao de emergencia,0.05,4,0.2
+posto_vacinas,Sala de vacinas (posto de saude),8.0,Terminal + impressora,0.1,1,0.1
+telecom_erb,Estacao radio-base (telecom),4.0,Transmissor/radio,0.4,1,0.4
+telecom_erb,Estacao radio-base (telecom),4.0,Ar-condicionado de emergencia,0.8,1,0.8
+residencia_essencial,Residencia - circuito essencial,6.0,Geladeira,0.15,1,0.15
+residencia_essencial,Residencia - circuito essencial,6.0,Bomba d'agua,0.5,1,0.5
+residencia_essencial,Residencia - circuito essencial,6.0,Iluminacao,0.08,3,0.24
+residencia_essencial,Residencia - circuito essencial,6.0,Roteador/internet,0.02,1,0.02

@@ -1,0 +1,15 @@
+regra,linhas_afetadas,observacao
+mes convertido para data (1º dia do mês); ano_mes mantido como texto,44886,
+coluna nivel criada (nacional = uf BR; estadual = demais),4270,saídas separadas por nível
+"chaves duplicadas (mes,uf,marca,modelo,tecnologia) detectadas",496,175 repetições exatas; tratadas como versões agrupadas sob o mesmo nome e SOMADAS
+"linhas com mesma chave sem tecnologia (mes,uf,marca,modelo)",2400,tecnologias diferentes NÃO são duplicata: mantidas separadas
+marca 'Desconhecido' -> 'Audi' (modelo Q6 e-tron),12,marca_original preservada
+"caixa de marca padronizada (KIA->Kia, Dfsk->DFSK); Mini e MON mantidas",956,decisão estilística
+"grafias unificadas em modelo_padronizado: TAN->Tan, BOX->Box, Fpace->F-Pace, G63AMG->AMG G 63",132,tecnologia NÃO alterada (Fpace=PHEV x F-Pace híbrido leve=MHEV; G63AMG=HEV x AMG G 63=MHEV): a confirmar na fonte
+linhas consolidadas por soma de emplacamentos,502,44886 -> 44384 linhas; total preservado
+modelo_limpo/versao: conteúdo entre parênteses movido para versao; Yuan Plus/Yuan Pro -> modelo_limpo Yuan,3476,
+verificação: Yuan Plus/Pro misturados com Yuan (Pro + Plus) no mesmo mes e uf,0,0 = sem dupla contagem
+coluna posicao original removida e recalculada por mes e uf,44384,desempate por marca e modelo (a ordem dos empates na fonte era arbitrária)
+reconciliação nacional x soma das UFs por mes/modelo/tecnologia,1,"divergência mantida: [{'ano_mes': '2026-07', 'marca': 'Omoda/Jaecoo', 'modelo_padronizado': 'Omoda 5 HEV', 'tecnologia': 'HEV', 'nacional': 2552, 'soma_estadual': 2551, 'diferenca': 1}]"
+modelos com mais de uma tecnologia (apenas relatório),14,tecnologia mantida na chave
+"picos de dez/2025 (+52%) e mar/2026 (+42%) no total nacional são sazonalidade, não erro",0,

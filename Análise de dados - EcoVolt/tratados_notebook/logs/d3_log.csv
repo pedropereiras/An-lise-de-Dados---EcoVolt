@@ -1,0 +1,8 @@
+regra,linhas_afetadas,observacao
+datetime convertido de texto para datetime,4180,
+diagnóstico do SOC original,0,"capacidade implícita 5.993 Ah; Ah integrados 5.587; nominal 5,596 Ah; SOC inicial 0.0677"
+"linha final com timestamp duplicado (19:17:14, I=0 A) movida para auditoria/d3_rejeitados.csv",1,a linha anterior permanece como último ponto da curva
+"soc_recalculado por contagem de coulomb (5,596 Ah, início em 0, dt = 1 s)",4179,final = 0.9984; soc_original preservado; ORIGEM DO SOC ORIGINAL A CONFIRMAR
+"transiente_inicial sinalizado na 1ª linha (I=5,997 A, V=2,934 V)",1,
+"fase CC/CV: CV a partir da 1ª amostra com corrente < 5,9 A",940,CV começa em elapsed_s = 3239
+documentação: corrente positiva = carga (no D1 a descarga é negativa); SOC em fração 0-1 (SOH do D1 em %); sem battery_id; sem join com D1/D2,0,

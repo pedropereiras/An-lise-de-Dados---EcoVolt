@@ -1,0 +1,224 @@
+uf,marca,modelo,tecnologia,emplacamentos,ano_mes,nivel,n_linhas_grupo,mesma_quantidade_em_todas
+BR,Ferrari,SF90,PHEV,1,2024-05,nacional,2,True
+BR,Ferrari,SF90,PHEV,1,2024-05,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2024-06,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2024-06,nacional,2,True
+SP,Ferrari,296,PHEV,1,2024-06,estadual,2,True
+SP,Ferrari,296,PHEV,1,2024-06,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2024-06,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2024-06,estadual,2,True
+SC,Ferrari,SF90,PHEV,1,2024-07,estadual,2,True
+SC,Ferrari,SF90,PHEV,1,2024-07,estadual,2,True
+MS,BYD,Dolphin,BEV,1,2024-09,estadual,2,True
+MS,BYD,Dolphin,BEV,1,2024-09,estadual,2,True
+MS,BYD,Dolphin Mini,BEV,7,2024-09,estadual,2,True
+MS,BYD,Dolphin Mini,BEV,7,2024-09,estadual,2,True
+PR,Ferrari,296,PHEV,1,2024-09,estadual,2,True
+PR,Ferrari,296,PHEV,1,2024-09,estadual,2,True
+BR,Ferrari,SF90,PHEV,1,2024-10,nacional,2,True
+BR,Ferrari,SF90,PHEV,1,2024-10,nacional,2,True
+SP,Ferrari,SF90,PHEV,1,2024-10,estadual,2,True
+SP,Ferrari,SF90,PHEV,1,2024-10,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,3,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,3,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,3,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-11,estadual,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2024-12,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2024-12,nacional,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-12,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2024-12,estadual,2,True
+SP,Mercedes-Benz,EQB,BEV,1,2024-12,estadual,2,True
+SP,Mercedes-Benz,EQB,BEV,1,2024-12,estadual,2,True
+BR,Chevrolet,Bolt,BEV,1,2025-01,nacional,2,True
+BR,Chevrolet,Bolt,BEV,1,2025-01,nacional,2,True
+BR,Ferrari,296,PHEV,1,2025-01,nacional,2,True
+BR,Ferrari,296,PHEV,1,2025-01,nacional,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+PE,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+PE,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-01,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,2,2025-01,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,2,2025-01,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-02,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-02,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-02,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-02,estadual,2,True
+RS,Ferrari,296,PHEV,1,2025-02,estadual,2,True
+RS,Ferrari,296,PHEV,1,2025-02,estadual,2,True
+BR,Ferrari,SF90,PHEV,1,2025-03,nacional,2,True
+BR,Ferrari,SF90,PHEV,1,2025-03,nacional,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-03,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-03,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-03,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-03,estadual,2,True
+SP,Ferrari,SF90,PHEV,1,2025-03,estadual,2,True
+SP,Ferrari,SF90,PHEV,1,2025-03,estadual,2,True
+BR,GMC,Hummer EV,BEV,1,2025-04,nacional,2,True
+BR,GMC,Hummer EV,BEV,1,2025-04,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-04,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-04,nacional,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-04,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-04,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-04,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-04,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-05,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-05,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-05,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-05,estadual,2,True
+BR,Foton,eView / eWonder,BEV,1,2025-06,nacional,2,True
+BR,Foton,eView / eWonder,BEV,1,2025-06,nacional,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-06,estadual,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-06,estadual,2,True
+SP,Foton,eView / eWonder,BEV,1,2025-06,estadual,2,True
+SP,Foton,eView / eWonder,BEV,1,2025-06,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-06,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-06,estadual,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-07,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-07,nacional,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-07,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-07,estadual,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-07,estadual,3,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-07,estadual,3,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-07,estadual,3,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-07,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-07,estadual,2,True
+BR,Mercedes-Benz,EQB,BEV,2,2025-08,nacional,2,True
+BR,Mercedes-Benz,EQB,BEV,2,2025-08,nacional,2,True
+PE,Mercedes-Benz,EQB,BEV,1,2025-08,estadual,2,True
+PE,Mercedes-Benz,EQB,BEV,1,2025-08,estadual,2,True
+PE,Mini,Aceman,BEV,1,2025-08,estadual,2,True
+PE,Mini,Aceman,BEV,1,2025-08,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-08,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-08,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-08,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-08,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-09,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-09,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-09,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-09,estadual,2,True
+BR,JAC,E-JV,BEV,1,2025-10,nacional,4,True
+BR,JAC,E-JV,BEV,1,2025-10,nacional,4,True
+BR,JAC,E-JV,BEV,1,2025-10,nacional,4,True
+BR,JAC,E-JV,BEV,1,2025-10,nacional,4,True
+BR,Mercedes-Benz,EQB,BEV,4,2025-10,nacional,2,True
+BR,Mercedes-Benz,EQB,BEV,4,2025-10,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-10,nacional,2,True
+BR,Mercedes-Benz,EQS,BEV,1,2025-10,nacional,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-10,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-10,estadual,2,True
+SP,JAC,E-JV,BEV,1,2025-10,estadual,3,True
+SP,JAC,E-JV,BEV,1,2025-10,estadual,3,True
+SP,JAC,E-JV,BEV,1,2025-10,estadual,3,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-10,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2025-10,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,2,True
+MT,Mini,Aceman,BEV,1,2025-11,estadual,2,True
+MT,Mini,Aceman,BEV,1,2025-11,estadual,2,True
+PE,Mercedes-Benz,EQB,BEV,1,2025-11,estadual,2,True
+PE,Mercedes-Benz,EQB,BEV,1,2025-11,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,2,True
+RS,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,3,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,3,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-11,estadual,3,True
+BR,Ferrari,SF90,PHEV,1,2025-12,nacional,2,True
+BR,Ferrari,SF90,PHEV,1,2025-12,nacional,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-12,estadual,2,True
+DF,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-12,estadual,2,True
+DF,Mini,Cooper elétrico,BEV,1,2025-12,estadual,2,True
+DF,Mini,Cooper elétrico,BEV,1,2025-12,estadual,2,True
+RJ,Mini,Cooper elétrico,BEV,1,2025-12,estadual,2,True
+RJ,Mini,Cooper elétrico,BEV,1,2025-12,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-12,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2025-12,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-01,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-01,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-01,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-01,estadual,2,True
+SC,Mini,Aceman,BEV,1,2026-01,estadual,2,True
+SC,Mini,Aceman,BEV,1,2026-01,estadual,2,True
+SP,JAC,E-JV,BEV,1,2026-01,estadual,2,True
+SP,JAC,E-JV,BEV,1,2026-01,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2026-01,estadual,2,True
+SP,Mercedes-Benz,EQS,BEV,1,2026-01,estadual,2,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-02,estadual,3,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-02,estadual,3,True
+RJ,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-02,estadual,3,True
+RJ,Mercedes-Benz,GLS 450,MHEV,1,2026-02,estadual,2,True
+RJ,Mercedes-Benz,GLS 450,MHEV,1,2026-02,estadual,2,True
+SP,Audi,Q6 e-tron,BEV,1,2026-02,estadual,2,True
+SP,Audi,Q6 e-tron,BEV,1,2026-02,estadual,2,True
+BR,JAC,E-JV,BEV,1,2026-03,nacional,2,True
+BR,JAC,E-JV,BEV,1,2026-03,nacional,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-03,estadual,2,True
+PR,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-03,estadual,2,True
+PR,Mini,Aceman,BEV,1,2026-03,estadual,2,True
+PR,Mini,Aceman,BEV,1,2026-03,estadual,2,True
+SC,Ferrari,296,PHEV,1,2026-03,estadual,2,True
+SC,Ferrari,296,PHEV,1,2026-03,estadual,2,True
+SP,Ferrari,SF90,PHEV,1,2026-03,estadual,2,True
+SP,Ferrari,SF90,PHEV,1,2026-03,estadual,2,True
+BA,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+BA,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+BR,Audi,Q6 e-tron,BEV,3,2026-04,nacional,2,True
+BR,Audi,Q6 e-tron,BEV,3,2026-04,nacional,2,True
+DF,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+DF,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-04,estadual,2,True
+GO,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-04,estadual,2,True
+MG,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+MG,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+SC,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+SC,Mini,Aceman,BEV,1,2026-04,estadual,2,True
+SP,Mercedes-Benz,EQB,BEV,1,2026-04,estadual,2,True
+SP,Mercedes-Benz,EQB,BEV,1,2026-04,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-05,estadual,2,True
+MG,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-05,estadual,2,True
+PR,Mini,Cooper elétrico,BEV,1,2026-05,estadual,2,True
+PR,Mini,Cooper elétrico,BEV,1,2026-05,estadual,2,True
+SP,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-05,estadual,2,True
+SP,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-05,estadual,2,True
+BR,JAC,E-JV,BEV,7,2026-06,nacional,2,True
+BR,JAC,E-JV,BEV,7,2026-06,nacional,2,True
+BR,Mercedes-Benz,EQB,BEV,1,2026-06,nacional,2,True
+BR,Mercedes-Benz,EQB,BEV,1,2026-06,nacional,2,True
+GO,Foton,eView / eWonder,BEV,1,2026-06,estadual,2,True
+GO,Foton,eView / eWonder,BEV,1,2026-06,estadual,2,True
+RJ,Foton,eView / eWonder,BEV,1,2026-06,estadual,2,True
+RJ,Foton,eView / eWonder,BEV,1,2026-06,estadual,2,True
+RJ,JAC,E-JV,BEV,7,2026-06,estadual,2,True
+RJ,JAC,E-JV,BEV,7,2026-06,estadual,2,True
+RS,Mini,Cooper elétrico,BEV,1,2026-06,estadual,2,True
+RS,Mini,Cooper elétrico,BEV,1,2026-06,estadual,2,True
+ES,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+ES,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+MG,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+MG,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+RJ,Mini,Aceman,BEV,1,2026-07,estadual,2,True
+RJ,Mini,Aceman,BEV,1,2026-07,estadual,2,True
+RJ,Mini,Cooper elétrico,BEV,1,2026-07,estadual,2,True
+RJ,Mini,Cooper elétrico,BEV,1,2026-07,estadual,2,True
+RS,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+RS,Foton,eView / eWonder,BEV,1,2026-07,estadual,2,True
+RS,Mini,Aceman,BEV,1,2026-07,estadual,2,True
+RS,Mini,Aceman,BEV,1,2026-07,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-07,estadual,2,True
+SC,Mercedes-Benz,"AMG E PERFORMANCE (C 63, GLC 63, GT 63, S 63, SL 63)",PHEV,1,2026-07,estadual,2,True
+BR,Renault,Kwid E-Tech,BEV,1,2026-08,nacional,2,True
+BR,Renault,Kwid E-Tech,BEV,1,2026-08,nacional,2,True
+SP,Ferrari,296,PHEV,2,2026-08,estadual,2,True
+SP,Ferrari,296,PHEV,2,2026-08,estadual,2,True
+SP,Ferrari,296,PHEV,1,2026-09,estadual,2,True
+SP,Ferrari,296,PHEV,1,2026-09,estadual,2,True
+SP,Foton,eView / eWonder,BEV,1,2026-09,estadual,2,True
+SP,Foton,eView / eWonder,BEV,1,2026-09,estadual,2,True

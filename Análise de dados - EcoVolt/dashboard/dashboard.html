@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EcoVolt - Continuidade energetica (AV1 Grupo 6)</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root{--verde:#0B6E4F;--ambar:#E1A100;--ruim:#C0392B;--cinza:#8A8F98;--fundo:#F6F8F7;--card:#fff;--txt:#1E2A24;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--fundo);color:var(--txt)}
+  header{background:linear-gradient(120deg,#0B6E4F,#0a5a41);color:#fff;padding:22px 28px}
+  header h1{margin:0;font-size:22px}
+  header p{margin:6px 0 0;opacity:.9;font-size:14px}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 20px 40px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+  .chip{border:1px solid #cfd8d3;background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px}
+  .chip.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+  .kpi{background:var(--card);border:1px solid #e3e8e5;border-radius:12px;padding:12px 14px}
+  .kpi .l{font-size:11px;color:var(--cinza);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .v{font-size:20px;font-weight:700;margin-top:4px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--card);border:1px solid #e3e8e5;border-radius:12px;padding:8px 10px}
+  .card.full{grid-column:1 / -1}
+  .card h3{margin:8px 10px 0;font-size:15px}
+  .card h3 small{display:block;font-weight:400;color:var(--cinza);font-size:12px;margin-top:2px}
+  footer{max-width:1180px;margin:0 auto;padding:0 20px 30px;color:#666;font-size:12px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>EcoVolt - Banco de 2a vida atende as cargas criticas?</h1>
+  <p>Decisao: <i>nas condicoes informadas, o cenario atende as cargas criticas durante o tempo requerido?</i> &middot; AV1 Grupo 6</p>
+</header>
+<div class="wrap">
+  <div class="chips" id="chips"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <div class="card full"><h3>V1. Composicao da carga critica<small>Onde esta o consumo que decide o caso</small></h3><div id="v1"></div></div>
+    <div class="card"><h3>V2. Autonomia ofertada vs requerida<small>Compara 2 alternativas de banco</small></h3><div id="v2"></div></div>
+    <div class="card"><h3>V3. Sensibilidade ao SOH<small>Quao robusta e a decisao</small></h3><div id="v3"></div></div>
+  </div>
+</div>
+<footer id="rodape"></footer>
+<script>
+const DATA = {"fatores": {"fator_capacidade": {"valor": 0.8, "origem": "CALCE CS2 SOH (dados/processados/calce_cs2_soh.csv)", "justificativa": "SOH de 2a vida adotado como 0,80 (limite tipico de reaproveitamento). O SOH NAO substitui ensaio de capacidade util; a curva de carga (curva_carga_5p596ah.csv) e a verificacao de capacidade (5,5872 Ah ~ 5,596 Ah nominais)."}, "fracao_uso": {"valor": 0.9, "origem": "Premissa declarada (profundidade de descarga permitida do banco)", "justificativa": "Fracao do Enominal utilizavel por ciclo (DoD de projeto)."}, "eficiencia": {"valor": 0.9, "origem": "Premissa declarada (rendimento de ida e volta do inversor + bateria)", "justificativa": "Perdas de conversao e internas."}}, "bancos": [{"id": "A", "nome": "Banco 2a vida conservador", "Enominal_kWh": 5.0, "Pmax_kW": 1.0}, {"id": "B", "nome": "Banco 2a vida expandido", "Enominal_kWh": 10.0, "Pmax_kW": 3.0}], "cenarios": [{"id": "posto_vacinas", "nome": "Sala de vacinas (posto de saude)", "duracao_h": 8.0, "cargas": [{"equipamento": "Refrigerador de vacinas", "potencia_kW": 0.2, "qtd": 1}, {"equipamento": "Iluminacao de emergencia", "potencia_kW": 0.05, "qtd": 4}, {"equipamento": "Terminal + impressora", "potencia_kW": 0.1, "qtd": 1}]}, {"id": "telecom_erb", "nome": "Estacao radio-base (telecom)", "duracao_h": 4.0, "cargas": [{"equipamento": "Transmissor/radio", "potencia_kW": 0.4, "qtd": 1}, {"equipamento": "Ar-condicionado de emergencia", "potencia_kW": 0.8, "qtd": 1}]}, {"id": "residencia_essencial", "nome": "Residencia - circuito essencial", "duracao_h": 6.0, "cargas": [{"equipamento": "Geladeira", "potencia_kW": 0.15, "qtd": 1}, {"equipamento": "Bomba d'agua", "potencia_kW": 0.5, "qtd": 1}, {"equipamento": "Iluminacao", "potencia_kW": 0.08, "qtd": 3}, {"equipamento": "Roteador/internet", "potencia_kW": 0.02, "qtd": 1}]}, {"id": "sem_carga_critica", "nome": "Caso vazio - sem cargas criticas", "duracao_h": 4.0, "cargas": []}], "resultados": [{"cenario": "posto_vacinas", "cenario_nome": "Sala de vacinas (posto de saude)", "banco": "A", "banco_nome": "Banco 2a vida conservador", "duracao_h": 8.0, "cargas": [{"equipamento": "Refrigerador de vacinas", "potencia_kW": 0.2, "qtd": 1}, {"equipamento": "Iluminacao de emergencia", "potencia_kW": 0.05, "qtd": 4}, {"equipamento": "Terminal + impressora", "potencia_kW": 0.1, "qtd": 1}], "Pcritica_kW": 0.5, "Pmax_kW": 1.0, "Edemanda_kWh": 4.0, "Eutilizavel_kWh": 3.24, "autonomia_h": 6.48, "Enao_atendida_kWh": 0.76, "status": "nao_atende", "motivo": "Autonomia < duracao requerida: faltam kWh."}, {"cenario": "telecom_erb", "cenario_nome": "Estacao radio-base (telecom)", "banco": "A", "banco_nome": "Banco 2a vida conservador", "duracao_h": 4.0, "cargas": [{"equipamento": "Transmissor/radio", "potencia_kW": 0.4, "qtd": 1}, {"equipamento": "Ar-condicionado de emergencia", "potencia_kW": 0.8, "qtd": 1}], "Pcritica_kW": 1.2, "Pmax_kW": 1.0, "Edemanda_kWh": 4.8, "Eutilizavel_kWh": 3.24, "autonomia_h": 2.7, "Enao_atendida_kWh": 1.56, "status": "inviavel_potencia", "motivo": "Pmax do banco < Pcritica: insuficiencia de potencia."}, {"cenario": "residencia_essencial", "cenario_nome": "Residencia - circuito essencial", "banco": "A", "banco_nome": "Banco 2a vida conservador", "duracao_h": 6.0, "cargas": [{"equipamento": "Geladeira", "potencia_kW": 0.15, "qtd": 1}, {"equipamento": "Bomba d'agua", "potencia_kW": 0.5, "qtd": 1}, {"equipamento": "Iluminacao", "potencia_kW": 0.08, "qtd": 3}, {"equipamento": "Roteador/internet", "potencia_kW": 0.02, "qtd": 1}], "Pcritica_kW": 0.91, "Pmax_kW": 1.0, "Edemanda_kWh": 5.46, "Eutilizavel_kWh": 3.24, "autonomia_h": 3.5604, "Enao_atendida_kWh": 2.22, "status": "nao_atende", "motivo": "Autonomia < duracao requerida: faltam kWh."}, {"cenario": "sem_carga_critica", "cenario_nome": "Caso vazio - sem cargas criticas", "banco": "A", "banco_nome": "Banco 2a vida conservador", "duracao_h": 4.0, "cargas": [], "Pcritica_kW": 0.0, "Pmax_kW": 1.0, "Edemanda_kWh": 0.0, "Eutilizavel_kWh": 3.24, "autonomia_h": null, "Enao_atendida_kWh": 0.0, "status": "sem_carga", "motivo": "Pcritica = 0: nao ha carga critica. Divisao de autonomia evitada."}, {"cenario": "posto_vacinas", "cenario_nome": "Sala de vacinas (posto de saude)", "banco": "B", "banco_nome": "Banco 2a vida expandido", "duracao_h": 8.0, "cargas": [{"equipamento": "Refrigerador de vacinas", "potencia_kW": 0.2, "qtd": 1}, {"equipamento": "Iluminacao de emergencia", "potencia_kW": 0.05, "qtd": 4}, {"equipamento": "Terminal + impressora", "potencia_kW": 0.1, "qtd": 1}], "Pcritica_kW": 0.5, "Pmax_kW": 3.0, "Edemanda_kWh": 4.0, "Eutilizavel_kWh": 6.48, "autonomia_h": 12.96, "Enao_atendida_kWh": 0.0, "status": "atende", "motivo": "Autonomia >= duracao requerida e potencia suficiente."}, {"cenario": "telecom_erb", "cenario_nome": "Estacao radio-base (telecom)", "banco": "B", "banco_nome": "Banco 2a vida expandido", "duracao_h": 4.0, "cargas": [{"equipamento": "Transmissor/radio", "potencia_kW": 0.4, "qtd": 1}, {"equipamento": "Ar-condicionado de emergencia", "potencia_kW": 0.8, "qtd": 1}], "Pcritica_kW": 1.2, "Pmax_kW": 3.0, "Edemanda_kWh": 4.8, "Eutilizavel_kWh": 6.48, "autonomia_h": 5.4, "Enao_atendida_kWh": 0.0, "status": "atende", "motivo": "Autonomia >= duracao requerida e potencia suficiente."}, {"cenario": "residencia_essencial", "cenario_nome": "Residencia - circuito essencial", "banco": "B", "banco_nome": "Banco 2a vida expandido", "duracao_h": 6.0, "cargas": [{"equipamento": "Geladeira", "potencia_kW": 0.15, "qtd": 1}, {"equipamento": "Bomba d'agua", "potencia_kW": 0.5, "qtd": 1}, {"equipamento": "Iluminacao", "potencia_kW": 0.08, "qtd": 3}, {"equipamento": "Roteador/internet", "potencia_kW": 0.02, "qtd": 1}], "Pcritica_kW": 0.91, "Pmax_kW": 3.0, "Edemanda_kWh": 5.46, "Eutilizavel_kWh": 6.48, "autonomia_h": 7.1209, "Enao_atendida_kWh": 0.0, "status": "atende", "motivo": "Autonomia >= duracao requerida e potencia suficiente."}, {"cenario": "sem_carga_critica", "cenario_nome": "Caso vazio - sem cargas criticas", "banco": "B", "banco_nome": "Banco 2a vida expandido", "duracao_h": 4.0, "cargas": [], "Pcritica_kW": 0.0, "Pmax_kW": 3.0, "Edemanda_kWh": 0.0, "Eutilizavel_kWh": 6.48, "autonomia_h": null, "Enao_atendida_kWh": 0.0, "status": "sem_carga", "motivo": "Pcritica = 0: nao ha carga critica. Divisao de autonomia evitada."}], "sensibilidade": {"posto_vacinas": {"fator": [0.6, 0.62, 0.64, 0.6599999999999999, 0.6799999999999999, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.8999999999999999, 0.9199999999999999, 0.94, 0.96, 0.98, 1.0], "A": [4.86, 5.022, 5.184000000000001, 5.346, 5.507999999999999, 5.67, 5.832, 5.994000000000001, 6.156, 6.3180000000000005, 6.48, 6.642, 6.804, 6.966, 7.128000000000001, 7.29, 7.452, 7.613999999999999, 7.776000000000001, 7.938000000000001, 8.1], "B": [9.72, 10.044, 10.368000000000002, 10.692, 11.015999999999998, 11.34, 11.664, 11.988000000000001, 12.312, 12.636000000000001, 12.96, 13.284, 13.608, 13.932, 14.256000000000002, 14.58, 14.904, 15.227999999999998, 15.552000000000001, 15.876000000000001, 16.2]}, "telecom_erb": {"fator": [0.6, 0.62, 0.64, 0.6599999999999999, 0.6799999999999999, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.8999999999999999, 0.9199999999999999, 0.94, 0.96, 0.98, 1.0], "A": [2.025, 2.0925, 2.16, 2.2274999999999996, 2.2949999999999995, 2.3625, 2.4299999999999997, 2.4975, 2.5649999999999995, 2.6325, 2.6999999999999997, 2.7674999999999996, 2.8349999999999995, 2.9025, 2.97, 3.0374999999999996, 3.1049999999999995, 3.172499999999999, 3.2399999999999998, 3.3074999999999997, 3.3749999999999996], "B": [4.05, 4.185, 4.32, 4.454999999999999, 4.589999999999999, 4.725, 4.859999999999999, 4.995, 5.129999999999999, 5.265, 5.3999999999999995, 5.534999999999999, 5.669999999999999, 5.805, 5.94, 6.074999999999999, 6.209999999999999, 6.344999999999998, 6.4799999999999995, 6.614999999999999, 6.749999999999999]}, "residencia_essencial": {"fator": [0.6, 0.62, 0.64, 0.6599999999999999, 0.6799999999999999, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.8999999999999999, 0.9199999999999999, 0.94, 0.96, 0.98, 1.0], "A": [2.6703296703296706, 2.7593406593406593, 2.848351648351649, 2.937362637362637, 3.026373626373626, 3.1153846153846154, 3.204395604395604, 3.2934065934065937, 3.382417582417582, 3.4714285714285715, 3.5604395604395607, 3.6494505494505494, 3.7384615384615385, 3.8274725274725276, 3.916483516483517, 4.0054945054945055, 4.094505494505494, 4.183516483516483, 4.2725274725274724, 4.361538461538462, 4.45054945054945], "B": [5.340659340659341, 5.518681318681319, 5.696703296703298, 5.874725274725274, 6.052747252747252, 6.230769230769231, 6.408791208791208, 6.586813186813187, 6.764835164835164, 6.942857142857143, 7.120879120879121, 7.298901098901099, 7.476923076923077, 7.654945054945055, 7.832967032967034, 8.010989010989011, 8.189010989010988, 8.367032967032966, 8.545054945054945, 8.723076923076924, 8.9010989010989]}}};
+const COR = {A:"#E1A100",B:"#0B6E4F",ruim:"#C0392B",cinza:"#8A8F98"};
+const LAYOUT = {template:"plotly_white",margin:{l:60,r:16,t:10,b:44},height:330,legend:{orientation:"h",y:1.15,x:0}};
+const RODAPE = "Fonte: cenarios sinteticos declarados (analise/cenarios.json) | Banco: dados/processados/calce_cs2_soh.csv (SOH de 2a vida) | Grupo 6 - EcoVolt";
+document.getElementById("rodape").textContent = RODAPE;
+
+const cen = DATA.cenarios, bancos = {};
+DATA.bancos.forEach(b=>bancos[b.id]=b);
+function res(cid,bid){return DATA.resultados.find(r=>r.cenario===cid&&r.banco===bid);}
+function statusCor(s){return s==="atende"?"#0B6E4F":(s==="nao_atende"?"#C0392B":(s==="inviavel_potencia"?"#8A6D00":"#8A8F98"));}
+function statusTxt(s){return {atende:"ATENDE",nao_atende:"NAO ATENDE",inviavel_potencia:"INVIAVEL POR POTENCIA",sem_carga:"SEM CARGA CRITICA"}[s];}
+
+function renderChips(sel){
+  const el=document.getElementById("chips"); el.innerHTML="";
+  cen.forEach(c=>{
+    const d=document.createElement("div"); d.className="chip"+(c.id===sel?" active":""); d.textContent=c.nome;
+    d.onclick=()=>select(c.id); el.appendChild(d);
+  });
+}
+function kpi(label,val,extra){return `<div class="kpi"><div class="l">${label}</div><div class="v">${val}</div>${extra||""}</div>`;}
+
+function render(sel){
+  renderChips(sel);
+  const c=cen.find(x=>x.id===sel);
+  const rA=res(sel,"A"), rB=res(sel,"B");
+  const st=(rB.status==="atende")?"atende":rB.status;
+  const k=document.getElementById("kpis"); k.innerHTML="";
+  k.innerHTML += kpi("P critica", rA.Pcritica_kW.toFixed(2)+" kW");
+  k.innerHTML += kpi("Duracao requerida", c.duracao_h.toFixed(0)+" h");
+  k.innerHTML += kpi("E demanda", rA.Edemanda_kWh.toFixed(2)+" kWh");
+  k.innerHTML += kpi("E utilizavel (A / B)", rA.Eutilizavel_kWh.toFixed(2)+" / "+rB.Eutilizavel_kWh.toFixed(2)+" kWh");
+  k.innerHTML += kpi("Autonomia (A / B)", (rA.autonomia_h==null?"n/d":rA.autonomia_h.toFixed(1)+" h")+" / "+(rB.autonomia_h==null?"n/d":rB.autonomia_h.toFixed(1)+" h"));
+  k.innerHTML += kpi("E nao atendida (A / B)", rA.Enao_atendida_kWh.toFixed(2)+" / "+rB.Enao_atendida_kWh.toFixed(2)+" kWh");
+  k.innerHTML += kpi("Decisao (Banco B)", `<span class="badge" style="background:${statusCor(st)}">${statusTxt(st)}</span>`, `<div style="font-size:11px;color:#666;margin-top:6px">${rB.motivo}</div>`);
+
+  const cargas=(c.cargas||[]).slice().reverse();
+  Plotly.react("v1",[{type:"bar",orientation:"h",x:cargas.map(e=>e.potencia_kW*e.qtd),y:cargas.map(e=>e.equipamento),
+    marker:{color:"#0B6E4F"},text:cargas.map(e=>(e.potencia_kW*e.qtd).toFixed(2)+" kW"),textposition:"outside"}],
+    Object.assign({},LAYOUT,{xaxis:{title:"Potencia simultanea (kW)",rangemode:"tozero"},yaxis:{automargin:true}}),{displayModeBar:false});
+
+  Plotly.react("v2",[
+    {type:"bar",name:"Banco A ("+bancos.A.Enominal_kWh+" kWh)",x:["Autonomia A"],y:[rA.autonomia_h||0],marker:{color:COR.A},text:[rA.autonomia_h==null?"n/d":rA.autonomia_h.toFixed(1)+" h"],textposition:"outside"},
+    {type:"bar",name:"Banco B ("+bancos.B.Enominal_kWh+" kWh)",x:["Autonomia B"],y:[rB.autonomia_h||0],marker:{color:COR.B},text:[rB.autonomia_h==null?"n/d":rB.autonomia_h.toFixed(1)+" h"],textposition:"outside"}
+  ],Object.assign({},LAYOUT,{shapes:[{type:"line",xref:"paper",x0:0,x1:1,y0:c.duracao_h,y1:c.duracao_h,line:{dash:"dot",color:"#333",width:2}}],
+    annotations:[{xref:"paper",x:1,y:c.duracao_h,text:"requerido "+c.duracao_h.toFixed(0)+" h",showarrow:false,yanchor:"bottom"}],
+    yaxis:{title:"Autonomia (h)",rangemode:"tozero"},xaxis:{title:""}}),{displayModeBar:false});
+
+  const s=DATA.sensibilidade[sel];
+  if(!s){Plotly.react("v3",[],[],{annotations:[{text:"Sem carga critica: autonomia indefinida (P critica = 0).",showarrow:false,font:{size:13}}],xaxis:{visible:false},yaxis:{visible:false},height:330});return;}
+  Plotly.react("v3",[
+    {type:"scatter",mode:"lines+markers",name:"Banco A",x:s.fator,y:s.A,line:{color:COR.A,width:3}},
+    {type:"scatter",mode:"lines+markers",name:"Banco B",x:s.fator,y:s.B,line:{color:COR.B,width:3}}
+  ],Object.assign({},LAYOUT,{shapes:[{type:"line",xref:"paper",x0:0,x1:1,y0:c.duracao_h,y1:c.duracao_h,line:{dash:"dot",color:"#333",width:2}}],
+    xaxis:{title:"Fator de capacidade remanescente (SOH)"},yaxis:{title:"Autonomia (h)",rangemode:"tozero"}}),{displayModeBar:false});
+}
+function select(id){render(id);}
+render("telecom_erb");
+</script>
+</body>
+</html>

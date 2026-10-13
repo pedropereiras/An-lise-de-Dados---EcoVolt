@@ -1,0 +1,34 @@
+# =============================================================================
+# AV1 - Analise e Visualizacao de Dados (2026.2) | Grupo 6 - EcoVolt
+# Dependencias do projeto, com versoes fixadas.
+#
+# Instalar tudo de uma vez:
+#     python -m pip install -r requirements.txt
+#
+# Criar um ambiente isolado antes (recomendado):
+#     python -m venv .venv
+#     .venv\Scripts\activate
+#     python -m pip install -r requirements.txt
+# =============================================================================
+
+# --- Núcleo da análise / notebook (obrigatórias) ---
+pandas==3.0.5
+numpy==2.5.2
+plotly==7.1.0
+openpyxl==3.1.5     # leitura das planilhas .xlsx (pandas.read_excel)
+kaleido==1.5.0      # exportação das vistas em PNG (fig.write_image)
+
+# --- Para executar o notebook (.ipynb) ---
+jupyterlab==4.6.4
+ipykernel==7.4.0
+
+# --- Projeto inicial (ecovolt-analytics / map-inic-crud.py) ---
+colorama==0.4.6
+
+# =============================================================================
+# Opcionais: instaladas no ambiente, mas NÃO importadas pelo código do projeto.
+# Descomente somente se for usar.
+# =============================================================================
+# matplotlib==3.11.1
+# scikit-learn==1.9.0
+# scipy==1.18.1

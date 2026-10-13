@@ -1,0 +1,12 @@
+regra,linhas_afetadas,observacao
+colunas padronizadas para snake_case minúsculo,5662,
+SOH > 100 capeado em 100 (original em soh_original),6,ciclo 1 de todas as baterias
+ciclos ausentes listados (não imputados); flag gap_antes na linha seguinte ao buraco,24,
+outlier_soh: |SOH - mediana móvel(11)| > 5 pontos; soh_suavizado substitui só os marcados,40,
+"outlier_tensao: desvio > 0,1 V da mediana móvel(11); correção só na coluna *_suavizado",10,
+"outlier_resistencia: desvio > 0,02 ohm da mediana móvel(11); apenas sinalizado",9,"CS2-34 ciclo 182 (0,127 -> 0,259 ohm, nível 0,22-0,24 depois) é mudança de nível: NÃO corrigido"
+resistencia_repetida: mesmo valor do ciclo anterior,354,valor não alterado
+flag abaixo_80 (SOH < 80),2477,"primeiro ciclo < 80: {'CS2-33': 487, 'CS2-34': 487, 'CS2-35': 157, 'CS2-36': 205, 'CS2-37': 113, 'CS2-38': 176}"
+saída completa,5662,
+saída restrita a SOH >= 80 (as linhas < 80 ficam só na versão completa),3185,2477 linhas fora desta versão
+"documentação: c_rate constante por bateria (0,5 em CS2-33/34; 1,0 em CS2-35..38), redundante com average_current_a; corrente negativa = descarga",0,risco de vazamento ao usar c_rate junto com battery_id

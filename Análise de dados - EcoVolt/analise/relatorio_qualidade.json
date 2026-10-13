@@ -1,0 +1,131 @@
+{
+  "originais_sha256": {
+    "ORIGINAL_5.596Ah_charge.xlsx": "072261ea7a95afc6ed41466a553b0b3ebfb547b676b2ed7b2391b6af5a852455",
+    "ORIGINAL_5_596Ah_charge.csv": "cfbe14877c26c33dd2ea1cf20f1fc1ed31de2778eb37c2c8761987a714c286f9",
+    "ORIGINAL_nomeErrado_CALCE_CS2_ML_SOH_Dataset.csv": "072261ea7a95afc6ed41466a553b0b3ebfb547b676b2ed7b2391b6af5a852455",
+    "ORIGINAL_nomeErrado_recarregados-emplacamentos.csv": "de823114bf77616f110f38659e60431f5b0eb6375f3c4ec64f8d4b4d18125646"
+  },
+  "calce": {
+    "linhas_bruto": 5662,
+    "linhas_limpo": 5662,
+    "duplicatas_removidas": 0,
+    "SOH_maior_100": 6,
+    "nulos": 0,
+    "SOH_min": 5.055589739146278,
+    "SOH_max": 100.0
+  },
+  "curva_carga": {
+    "linhas": 4180,
+    "nulos": 0,
+    "capacidade_integrada_Ah": 5.5872
+  },
+  "parametros": {
+    "fator_capacidade": 0.8,
+    "fracao_uso": 0.9,
+    "eficiencia": 0.9
+  },
+  "bancos": [
+    {
+      "id": "A",
+      "nome": "Banco 2a vida conservador",
+      "Enom": 5.0,
+      "Pmax": 1.0
+    },
+    {
+      "id": "B",
+      "nome": "Banco 2a vida expandido",
+      "Enom": 10.0,
+      "Pmax": 3.0
+    }
+  ],
+  "resultados": [
+    {
+      "cenario": "Sala de vacinas (posto de saude)",
+      "banco": "A",
+      "Pcritica_kW": 0.5,
+      "Edemanda_kWh": 4.0,
+      "Eutilizavel_kWh": 3.24,
+      "Pmax_kW": 1.0,
+      "autonomia_h": 6.48,
+      "Enao_atendida_kWh": 0.76,
+      "status": "nao_atende"
+    },
+    {
+      "cenario": "Estacao radio-base (telecom)",
+      "banco": "A",
+      "Pcritica_kW": 1.2,
+      "Edemanda_kWh": 4.8,
+      "Eutilizavel_kWh": 3.24,
+      "Pmax_kW": 1.0,
+      "autonomia_h": 2.7,
+      "Enao_atendida_kWh": 1.56,
+      "status": "inviavel_potencia"
+    },
+    {
+      "cenario": "Residencia - circuito essencial",
+      "banco": "A",
+      "Pcritica_kW": 0.91,
+      "Edemanda_kWh": 5.46,
+      "Eutilizavel_kWh": 3.24,
+      "Pmax_kW": 1.0,
+      "autonomia_h": 3.56,
+      "Enao_atendida_kWh": 2.22,
+      "status": "nao_atende"
+    },
+    {
+      "cenario": "Caso vazio - sem cargas criticas",
+      "banco": "A",
+      "Pcritica_kW": 0.0,
+      "Edemanda_kWh": 0.0,
+      "Eutilizavel_kWh": 3.24,
+      "Pmax_kW": 1.0,
+      "autonomia_h": NaN,
+      "Enao_atendida_kWh": 0.0,
+      "status": "sem_carga"
+    },
+    {
+      "cenario": "Sala de vacinas (posto de saude)",
+      "banco": "B",
+      "Pcritica_kW": 0.5,
+      "Edemanda_kWh": 4.0,
+      "Eutilizavel_kWh": 6.48,
+      "Pmax_kW": 3.0,
+      "autonomia_h": 12.96,
+      "Enao_atendida_kWh": 0.0,
+      "status": "atende"
+    },
+    {
+      "cenario": "Estacao radio-base (telecom)",
+      "banco": "B",
+      "Pcritica_kW": 1.2,
+      "Edemanda_kWh": 4.8,
+      "Eutilizavel_kWh": 6.48,
+      "Pmax_kW": 3.0,
+      "autonomia_h": 5.4,
+      "Enao_atendida_kWh": 0.0,
+      "status": "atende"
+    },
+    {
+      "cenario": "Residencia - circuito essencial",
+      "banco": "B",
+      "Pcritica_kW": 0.91,
+      "Edemanda_kWh": 5.46,
+      "Eutilizavel_kWh": 6.48,
+      "Pmax_kW": 3.0,
+      "autonomia_h": 7.121,
+      "Enao_atendida_kWh": 0.0,
+      "status": "atende"
+    },
+    {
+      "cenario": "Caso vazio - sem cargas criticas",
+      "banco": "B",
+      "Pcritica_kW": 0.0,
+      "Edemanda_kWh": 0.0,
+      "Eutilizavel_kWh": 6.48,
+      "Pmax_kW": 3.0,
+      "autonomia_h": NaN,
+      "Enao_atendida_kWh": 0.0,
+      "status": "sem_carga"
+    }
+  ]
+}
