@@ -16,4 +16,4 @@
 - <a href="https://www.github.com/matheusalexandre">Matheus Alexandre</a>
 - Rafael Brito
 
-Former members: Daniel Lucas, Romeu Alves, Theo Pessoa
+
