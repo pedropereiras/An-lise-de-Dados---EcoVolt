@@ -1,0 +1,699 @@
+---
+title: "EcoVolt Analytics — Relatório de Racionalização e Validação"
+subtitle: "AV1 · Análise e Visualização de Dados · Grupo 6"
+author: "Matheus Alexandre, Pedro Pereira, Mateus Tarcisio, Breno Neves, Rafael Brito e Lucas Oliveira"
+date: "20 de outubro de 2026"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+# Função segura para imagens: se o arquivo não existir, o Knit NÃO quebra;
+# apenas mostra um aviso de pendência no lugar da figura.
+mostrar_imagem <- function(caminho) {
+  if (file.exists(caminho)) {
+    knitr::include_graphics(caminho)
+  } else {
+    cat("PENDÊNCIA: o arquivo '", caminho, "' não foi encontrado.\n",
+        "Pasta de trabalho atual: ", getwd(), "\n",
+        "Confira se a pasta 'imagens' está no mesmo diretório do .Rmd e se o nome ",
+        "(incluindo maiúsculas e extensão) é exatamente igual.", sep = "")
+  }
+}
+```
+
+<style>
+:root { --eco-red:#B8202E; --eco-red-dark:#851824; --eco-ink:#252832; --eco-muted:#667085; --eco-bg:#F5F6F8; --eco-line:#E2E5EA; }
+body { background:var(--eco-bg); color:var(--eco-ink); font-family:"Segoe UI",Arial,sans-serif; font-size:15px; line-height:1.75; }
+.main-container { max-width:1150px; background:#fff; padding:38px 48px; margin-top:24px; margin-bottom:36px; border:1px solid var(--eco-line); border-radius:12px; box-shadow:0 8px 28px rgba(25,30,40,.06); }
+.title { color:var(--eco-red-dark); font-weight:800; } h1,h2,h3,h4 { color:var(--eco-ink); line-height:1.4; } h1 { border-bottom:3px solid var(--eco-red); padding-bottom:10px; margin-top:36px; } h2 { border-left:5px solid var(--eco-red); padding:7px 0 7px 13px; margin-top:30px; } h3 { color:var(--eco-red-dark); margin-top:24px; } a { color:var(--eco-red); } table { width:100%!important; border-collapse:collapse; margin:18px 0; font-size:13px; line-height:1.55; } thead th { background:var(--eco-ink); color:white; padding:10px; text-align:left; } tbody td { padding:9px 10px; border-bottom:1px solid var(--eco-line); vertical-align:top; } tbody tr:nth-child(even) { background:#F8F9FB; } blockquote { border-left:4px solid var(--eco-red); background:#FFF5F5; padding:12px 18px; } pre { border:1px solid var(--eco-line); border-radius:6px; padding:14px; } hr { border:0; border-top:1px solid var(--eco-line); margin:28px 0; }
+</style>
+
+# 1. Resumo executivo
+
+O **EcoVolt Analytics** apoia uma decisão específica: **“Nas condições informadas, o cenário atende às cargas críticas durante o tempo requerido de interrupção?”** O protótipo compara a potência exigida pelas cargas, a energia utilizável de dois bancos de baterias de segunda vida e a autonomia estimada em três cenários de uso. Também inclui um cenário sem cargas críticas para documentar o comportamento quando não há consumo a avaliar.
+
+O pacote atual contém scripts de preparação e validação, dicionário de dados, memória de cálculo, resultados em JSON, três notebooks de vistas analíticas e um dashboard Shiny/Plotly. O relatório não trata os cenários de carga e bancos como medições de campo: esses parâmetros são **sintéticos e ilustrativos**, declarados para demonstrar a lógica de decisão. Os dados CALCE CS2 e a curva de carga são utilizados como referência analítica e verificação, não como medição direta de uma instalação real.
+
+**Resultado central do recorte atual:** o Banco A não atende aos três cenários com cargas críticas; na estação rádio-base, além da energia, há uma restrição de potência. O Banco B atende aos três cenários simulados com as premissas-padrão. Isso não comprova que um banco real terá o mesmo desempenho: a conclusão vale apenas para os parâmetros modelados.
+
+# 2. Estado atual, público e decisão
+
+## 2.1. Problema e usuário
+
+Interrupções no fornecimento podem comprometer equipamentos que precisam continuar funcionando, como refrigeração de vacinas, telecomunicações, iluminação e bombeamento de água. O EcoVolt organiza os parâmetros necessários para avaliar, em caráter preliminar, se uma solução de armazenamento é compatível com uma demanda e um tempo de interrupção definidos.
+
+Os públicos de produto descritos pelo grupo permanecem **personas em validação**, e não clientes confirmados: operação produtiva rural, gestor com cargas críticas e gestor de infraestrutura pública. Para este protótipo, a pessoa usuária é representada como alguém que precisa comparar alternativas de banco de baterias e compreender por que um cenário atende ou falha.
+
+## 2.2. Decisão, escopo e limites
+
+| Elemento | Definição adotada |
+|---|---|
+| Decisão apoiada | Verificar se o banco selecionado atende à potência e à energia exigidas durante o período requerido. |
+| Unidade de análise | Combinação entre cenário de cargas, duração requerida, banco de baterias e premissas de bateria. |
+| Escopo incluído | Cargas críticas simultâneas, potência crítica, energia demandada, energia utilizável, autonomia, déficit energético e limite de potência. |
+| Fora do escopo desta AV1 | Dimensionamento elétrico executivo, garantia de segurança, recomendação comercial definitiva e validação em instalação real. |
+| Natureza do resultado | Simulação reproduzível com cargas e bancos ilustrativos; referências de bateria oriundas de dados experimentais. |
+
+## 2.3. Perguntas analíticas
+
+- **P1 — Composição da carga:** quais equipamentos contribuem mais para a potência crítica simultânea e a potência total ultrapassa a potência máxima do banco?
+- **P2 — Atendimento do cenário:** a autonomia estimada alcança a duração requerida para cada combinação de cenário e banco? Qual é o déficit de energia quando não atende?
+- **P3 — Sensibilidade:** como a autonomia estimada varia com o estado de saúde da bateria (SOH), mantendo os demais parâmetros constantes?
+
+As três perguntas são respondidas pelas vistas V1, V2 e V3, respectivamente, descritas na seção 7.
+
+## 2.4. Operação, cargas críticas e origem dos parâmetros
+
+**Escolha do recorte.** Em vez de uma única operação, o protótipo usa três operações pequenas e distintas: sala de vacinas de um posto de saúde, estação rádio-base de telecomunicações e circuito essencial de uma residência. Elas correspondem às aplicações de continuidade energética citadas no problema (refrigeração, telecomunicações, bombeamento e iluminação) e permitem comparar situações em que a restrição é de energia ou de potência. A persona rural continua **em validação**; os cenários não foram obtidos com ela.
+
+**Por que cada carga é considerada crítica.** A classificação é uma **hipótese de projeto do grupo**, não informação de uma operação real: o equipamento é tratado como crítico quando sua interrupção compromete o serviço descrito pelo cenário (conservar vacinas, manter o enlace de telecomunicações ou preservar alimentos, água e comunicação).
+
+**Cadastro de cargas por cenário (valores sintéticos; potência estimada, hipótese do grupo).**
+
+| Cenário | Equipamento | Potência unitária (kW) | Quantidade simultânea | Potência simultânea (kW) | Origem da potência |
+|---|---|---:|---:|---:|---|
+| Sala de vacinas | Refrigerador de vacinas | 0,20 | 1 | 0,20 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Sala de vacinas | Iluminação de emergência | 0,05 | 4 | 0,20 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Sala de vacinas | Terminal + impressora | 0,10 | 1 | 0,10 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Estação rádio-base | Transmissor/rádio | 0,40 | 1 | 0,40 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Estação rádio-base | Ar-condicionado de emergência | 0,80 | 1 | 0,80 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Residência essencial | Geladeira | 0,15 | 1 | 0,15 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Residência essencial | Bomba d’água | 0,50 | 1 | 0,50 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Residência essencial | Iluminação | 0,08 | 3 | 0,24 | Estimada; hipótese do grupo, fonte técnica não registrada |
+| Residência essencial | Roteador/internet | 0,02 | 1 | 0,02 | Estimada; hipótese do grupo, fonte técnica não registrada |
+
+Os totais por cenário (0,50 kW, 1,20 kW e 0,91 kW) conferem com a seção 6. Todas as cargas são tratadas como constantes e simultâneas durante a interrupção; o regime de uso variável não foi modelado.
+
+**Interrupções.** As durações de 8 h, 4 h e 6 h são **cenários hipotéticos**, sem início e fim registrados e sem evento observado associado. O caso vazio (sem cargas) declara 4 h apenas para documentar o comportamento do painel.
+
+**Tabela de parâmetros e origem.**
+
+| Parâmetro | Valor | Origem | Papel no modelo |
+|---|---|---|---|
+| Potência e quantidade das cargas | Por cenário (tabela acima) | Estimada; hipótese do grupo; sem medição e sem fonte técnica registrada | Variável do cenário |
+| Duração requerida | 8 h, 4 h e 6 h | Cenário hipotético | Variável do cenário |
+| Energia nominal do banco | A = 5 kWh; B = 10 kWh | Simulada, valor ilustrativo | Fixo |
+| Potência máxima do banco | A = 1 kW; B = 3 kW | Simulada, valor ilustrativo | Fixo |
+| SOH / fator de capacidade remanescente | 80% (faixa 60% a 100%) | Premissa de modelagem; CALCE CS2 dá apenas ordem de grandeza | Premissa ajustável |
+| Fração de uso (DoD) | 90% (faixa 50% a 100%) | Premissa de modelagem | Premissa ajustável |
+| Eficiência combinada | 90% (faixa 70% a 100%) | Premissa de modelagem | Premissa ajustável |
+
+**Fatores não duplicados.** A energia nominal (5 kWh e 10 kWh) é a energia declarada do banco **sem** nenhum desconto: capacidade remanescente, fração de uso e eficiência são aplicados uma única vez, na fórmula da seção 5.3. Nenhum desses fatores está embutido nos valores de energia nominal.
+
+# 3. Inventário de fontes e dicionário
+
+Os arquivos originais foram preservados em `dados/raw/`; as versões processadas e os artefatos de análise ficam nas pastas `dados/processados/`, `analise/`, `tratados_notebook/` e `dashboard/` do repositório.
+
+| Fonte/arquivo | Conteúdo e uso nesta análise | Natureza e limitação |
+|---|---|---|
+| `dados/raw/ORIGINAL_5.596Ah_charge.xlsx` | Curva de carga, com timestamp, tensão, corrente e SOC; usada para conferir a capacidade integrada. | Medições experimentais do arquivo; não representa automaticamente um banco de baterias de 5 ou 10 kWh. |
+| `dados/processados/curva_carga_5p596ah_xlsx.csv` | Exportação processada da curva de carga para análise reproduzível. | Derivada do arquivo original; não é uma nova fonte independente. |
+| `dados/processados/calce_cs2_soh.csv` | Dados de baterias CALCE CS2, incluindo bateria, ciclo, C-rate, tensão média, corrente média, resistência interna e SOH. | Dados experimentais de referência; a amostra não mede a capacidade útil dos bancos simulados. |
+| `dados/processados/calce_cs2_soh_limpo.csv` | Versão tratada com SOH corrigido e indicadores de valores fora do intervalo esperado. | Mantém os registros originais e cria campos de auditoria; não apaga silenciosamente ocorrências. |
+| `analise/cenarios.json` | Cargas críticas, quantidades simultâneas, durações, energia nominal e potência máxima dos bancos. | **Dados sintéticos declarados pelo grupo**, usados na simulação da decisão. |
+| `analise/resultados.json` | Resultados calculados para combinações de cenário e banco. | Saída derivada dos parâmetros e fórmulas do modelo; deve ser reproduzida pelo código. |
+| `analise/relatorio_qualidade.json` e `analise/validacao_resultado.json` | Resumo das verificações de qualidade e resultado dos testes automatizados. | Evidência gerada pelo pipeline; recomenda-se manter esses arquivos atualizados após alterações. |
+
+### Grão e chave de cada fonte
+
+| Fonte | Grão (o que uma linha representa) | Chave esperada | Registros |
+|---|---|---|---|
+| `calce_cs2_soh.csv` / `calce_cs2_soh_limpo.csv` | Um ciclo de uma bateria | `battery_id` + `cycle_number` (única, Q3) | 5.662 |
+| `curva_carga_5p596ah_xlsx.csv` | Uma amostra temporal da curva de carga | `Date_Time` (ordem temporal) | 4.180 |
+| `cenarios.json` | Um equipamento em um cenário; parâmetros do banco | cenário + equipamento; banco | 9 cargas em 3 cenários (mais o cenário vazio) e 2 bancos |
+| `resultados.json` | Uma combinação cenário × banco | cenário + banco | 4 cenários × 2 bancos, como no painel (conferir contagem no arquivo) |
+
+## 3.1. Dicionário dos campos utilizados
+
+| Campo | Tipo/unidade | Significado e papel no cálculo |
+|---|---|---|
+| `equipamento` | Texto | Nome da carga crítica do cenário. |
+| `potencia` | Numérico, kW | Potência unitária informada para o equipamento no cenário sintético. |
+| `qtd` | Inteiro, unidades | Quantidade que pode operar simultaneamente. |
+| `duracao` | Numérico, h | Tempo de interrupção que o cenário precisa cobrir. |
+| `E` / `Enominal` | Numérico, kWh | Energia nominal declarada para o banco A ou B. |
+| `P` / `Pmax` | Numérico, kW | Potência máxima declarada do banco. |
+| `soh` / `SOH` | Numérico, % no painel; fração no cálculo | Estado de saúde da bateria. No modelo de banco, o valor inicial é 80%. |
+| `dod` / `fracao_uso` | Numérico, % no painel; fração no cálculo | Fração de descarga/energia nominal considerada utilizável; padrão de 90%. |
+| `efi` / `eficiencia` | Numérico, % no painel; fração no cálculo | Eficiência combinada adotada para bateria e inversor; padrão de 90%. |
+| `battery_id` | Texto | Identificador da célula no conjunto CALCE CS2. |
+| `cycle_number` | Inteiro, ciclos | Número do ciclo registrado. |
+| `C_rate` | Numérico, C | Taxa de carga/descarga registrada no conjunto experimental. |
+| `average_voltage_V` | Numérico, V | Tensão média no ciclo. |
+| `average_current_A` | Numérico, A | Corrente média no ciclo. |
+| `internal_resistance_ohm` | Numérico, Ω | Resistência interna estimada. |
+| `SOH` / `SOH_corrigido` | Numérico, % | Estado de saúde original e valor limitado a 100% na coluna corrigida. |
+| `Date_Time` | Data/hora | Instante da amostra da curva de carga. |
+| `Voltage(V)` | Numérico, V | Tensão medida na curva de carga. |
+| `Current(A)` | Numérico, A | Corrente medida na curva de carga. |
+| `SOC` | Numérico, proporção 0–1 | Estado de carga informado na curva. |
+
+## 3.2. Problema de rastreabilidade identificado
+
+O dicionário do projeto registra arquivos originais com nomes/formato inconsistentes: um arquivo chamado `CALCE_CS2_ML_SOH_Dataset.csv` tinha assinatura de XLSX e hash idêntico ao arquivo da curva de carga; já o arquivo `recarregados-emplacamentos...csv` correspondia ao conjunto CALCE CS2, e não à base de emplacamentos esperada. A base de emplacamentos não foi usada na decisão desta AV1. Os originais foram preservados e a correção foi feita por cópias processadas e nomes descritivos. Essa decisão evita associar dados à fonte errada.
+
+# 4. Preparação e qualidade dos dados
+
+As verificações abaixo incluem resultados registrados e verificações documentais adicionais. Onde se pede confirmar ou executar, a evidência ainda precisa ser produzida; critério esperado não significa teste executado.
+
+| Nº | Verificação | Comando ou procedimento | Evidência/resultado registrado | Decisão adotada |
+|---|---|---|---|---|
+| Q1 | Conferência de identidade e formato dos arquivos | Comparar nome, extensão, assinatura real e hash (por exemplo, SHA-256). | Foram identificados nomes trocados; dois arquivos tinham hash idêntico apesar de nomes/extensões diferentes. | Preservar originais, corrigir a identificação nas cópias processadas e não utilizar a base de emplacamentos ausente. |
+| Q2 | Valores ausentes no CALCE CS2 | Contar valores ausentes por coluna (`isna().sum()`). | 5.662 linhas e 0 valores nulos registrados. | Não foi necessário imputar valores nesse conjunto. |
+| Q3 | Duplicatas no CALCE CS2 | Contar duplicatas exatas e pela chave `battery_id` + `cycle_number`. | 0 duplicatas exatas e 0 duplicatas pela chave `battery_id` + `cycle_number`. | Manter as 5.662 linhas e ordenar por bateria e ciclo. |
+| Q4 | SOH acima do limite físico esperado | Filtrar `SOH > 100`; criar `SOH_corrigido = pmin(SOH, 100)` na coluna tratada; preservar original e flag. | 6 ocorrências acima de 100%; máximo tratado = 100%. | Preservar `SOH` original, limitar a 100 na coluna `SOH_corrigido` e sinalizar as seis linhas com `soh_acima_100_flag`. |
+| Q5 | Conferência da curva de carga e capacidade integrada | Integrar corrente pelo intervalo temporal e comparar com a referência nominal de 5,596 Ah. | 4.180 linhas, 0 nulos; integral de 5,5872 Ah. | Diferença aproximada de 0,16%; não concluir que essa é a capacidade útil dos bancos simulados. |
+| Q6 | Tipos e unidades | Inspecionar tipos e unidades: data/hora, V, A, kW, kWh, horas e SOC como proporção 0–1 ou percentual identificado. | Verificação documental adicionada; executar novamente no arquivo real e registrar a saída do comando. | Não misturar percentuais e frações; corrigir tipos/unidades antes de calcular. |
+| Q7 | Cobertura e junções | Conferir arquivos, intervalos cobertos e junções entre fontes. | A base de emplacamentos não entra no cálculo; não há junção necessária no recorte atual. | Registrar: “Nenhuma junção; não se aplica”. |
+
+**Distinção importante:** a ausência de nulos nos conjuntos analisados não significa que todos os dados necessários para uma aplicação real estejam disponíveis. As cargas, a duração, a energia nominal e a potência máxima dos bancos foram definidos como cenários sintéticos. Para uso operacional, esses valores precisariam ser fornecidos e validados por responsável técnico.
+
+## 4.1. Verificações de qualidade sobre as entradas do modelo
+
+As verificações Q1 a Q7 acima tratam dos arquivos de dados. Os testes abaixo tratam das **entradas que alimentam o cálculo** (cenários, cargas e bancos, as mesmas do relatório e do `app.R`) e são **executados na renderização** deste documento; a coluna de resultados é calculada no momento do Knit.
+
+```{r qualidade-entradas, echo=FALSE}
+bancos_q <- data.frame(banco = c("A", "B"), E_nom = c(5, 10), P_max = c(1, 3))
+cargas_q <- data.frame(
+  cenario = c(rep("Sala de vacinas", 3), rep("Estação rádio-base (telecom)", 2),
+              rep("Residência — circuito essencial", 4)),
+  equipamento = c("Refrigerador de vacinas", "Iluminação de emergência", "Terminal + impressora",
+                  "Transmissor/rádio", "Ar-condicionado de emergência",
+                  "Geladeira", "Bomba d'água", "Iluminação", "Roteador/internet"),
+  potencia = c(0.20, 0.05, 0.10, 0.40, 0.80, 0.15, 0.50, 0.08, 0.02),
+  qtd = c(1, 4, 1, 1, 1, 1, 1, 3, 1),
+  stringsAsFactors = FALSE)
+cenarios_q <- data.frame(
+  cenario = c("Sala de vacinas", "Estação rádio-base (telecom)",
+              "Residência — circuito essencial", "Caso vazio — sem cargas críticas"),
+  P_crit = c(0.50, 1.20, 0.91, 0.00), t_req = c(8, 4, 6, 4),
+  stringsAsFactors = FALSE)
+
+soma_cad <- tapply(cargas_q$potencia * cargas_q$qtd, cargas_q$cenario, sum)
+com_carga <- cenarios_q$cenario[1:3]
+fecha <- all(abs(soma_cad[com_carga] - cenarios_q$P_crit[1:3]) < 1e-9)
+
+tab_q <- data.frame(
+  `Nº` = c("E1", "E2", "E3", "E4", "E5", "E6"),
+  `Verificação` = c("Chaves e duplicidade", "Ausência e códigos", "Tipos e unidades",
+                    "Domínio e plausibilidade", "Cobertura e junções", "Cadastro de cargas × potência crítica"),
+  `Resultado obtido (na renderização)` = c(
+    paste0("anyDuplicated: cenários = ", anyDuplicated(cenarios_q$cenario),
+           "; bancos = ", anyDuplicated(bancos_q$banco), " (0 = nenhuma repetição)"),
+    paste0("valores ausentes: cenários = ", sum(is.na(cenarios_q)), "; bancos = ", sum(is.na(bancos_q)),
+           "; cargas = ", sum(is.na(cargas_q))),
+    paste0("P_crit e t_req: ", class(cenarios_q$P_crit), " e ", class(cenarios_q$t_req),
+           "; E_nom e P_max: ", class(bancos_q$E_nom), " e ", class(bancos_q$P_max),
+           " (potências em kW, durações em h, energias em kWh)"),
+    paste0("P_crit ≥ 0: ", all(cenarios_q$P_crit >= 0), "; t_req > 0: ", all(cenarios_q$t_req > 0),
+           "; E_nom > 0: ", all(bancos_q$E_nom > 0), "; P_max > 0: ", all(bancos_q$P_max > 0)),
+    paste0("combinações cenário × banco = ", nrow(merge(cenarios_q, bancos_q, by = NULL)),
+           " (esperado: ", nrow(cenarios_q) * nrow(bancos_q), ")"),
+    paste0("soma das cargas fecha com P_crit nos 3 cenários com carga: ", fecha)),
+  `Decisão e impacto` = c(
+    "Chaves únicas; nenhuma colisão a resolver.",
+    "Ausência é tratada como dado ausente, nunca como zero (seção 5.6).",
+    "Unidades uniformes; não se mistura kW com kWh.",
+    "Entradas dentro do domínio físico; carga zero é válida e tratada à parte.",
+    "Nenhuma junção multiplica linhas; o produto cartesiano é intencional (cenário × banco).",
+    "O cadastro da seção 2.4 reproduz a potência crítica usada em todo o relatório."),
+  check.names = FALSE, stringsAsFactors = FALSE)
+knitr::kable(tab_q)
+```
+
+Estes testes verificam as entradas do modelo; não validam os dados do CALCE CS2 (já tratados em Q2 a Q5 acima) nem comprovam que as cargas representem uma instalação real.
+
+# 5. Indicadores, fórmulas e premissas
+
+## 5.1. Potência crítica
+
+Para cada equipamento, a potência simultânea é a potência unitária multiplicada pela quantidade que pode operar ao mesmo tempo. A potência crítica total é a soma das potências simultâneas:
+
+\[
+P_{crit} = \sum_{i=1}^{n} P_i \times q_i
+\]
+
+Unidade: kW. O denominador não se aplica, pois a medida é uma soma de potências simultâneas. A simultaneidade é uma premissa explícita do cenário.
+
+## 5.2. Energia demandada
+
+\[
+E_{demanda} = P_{crit} \times t_{requerido}
+\]
+
+Unidade: kWh, calculada por kW × hora. A fórmula supõe potência constante durante a duração definida; não modela partida de motores, picos transitórios nem perfis de carga variáveis.
+
+## 5.3. Energia utilizável
+
+\[
+E_{utilizavel} = E_{nominal} \times f_{capacidade} \times f_{uso} \times \eta
+\]
+
+Premissas-padrão do modelo: fator de capacidade = 0,80; fração de uso/descarga (DoD) = 0,90; eficiência combinada = 0,90. Assim, o fator total é 0,80 × 0,90 × 0,90 = 0,648. Os bancos são definidos como A = 5,0 kWh nominais e 1,0 kW máximos; B = 10,0 kWh nominais e 3,0 kW máximos.
+
+| Banco | Energia nominal | Fator total | Energia utilizável calculada | Potência máxima |
+|---|---:|---:|---:|---:|
+| A — conservador | 5,00 kWh | 0,648 | 3,24 kWh | 1,00 kW |
+| B — expandido | 10,00 kWh | 0,648 | 6,48 kWh | 3,00 kW |
+
+O fator de capacidade 0,80 é uma premissa de modelagem usada como proxy do SOH selecionado no painel: o slider de SOH é multiplicado pela energia nominal, fração de uso e eficiência. O valor 80% é o padrão inicial, mas não é medida direta de capacidade útil. SOH não substitui ensaio de capacidade útil ou teste de descarga. O CALCE CS2 serve como referência experimental para contextualizar a ordem de grandeza do SOH e a degradação; não determina diretamente a capacidade dos bancos sintéticos A e B. A faixa de 60% a 100% do slider é uma faixa de simulação definida para análise de sensibilidade, não uma faixa operacional recomendada pelo CALCE.
+
+## 5.4. Autonomia, déficit e limite de potência
+
+\[
+T_{autonomia} = \frac{E_{utilizavel}}{P_{crit}}
+\]
+
+A autonomia é expressa em horas, desde que a potência crítica seja maior que zero. Quando `Pcrit = 0`, a autonomia é **indefinida**, e não zero nem infinita; o sistema deve exibir o estado “Sem carga crítica” e evitar divisão por zero.
+
+\[
+E_{nao\ atendida} = \max(0, E_{demanda} - E_{utilizavel})
+\]
+
+O cenário é inviável por potência quando `Pmax < Pcrit`, mesmo que a razão energia/potência pareça indicar alguma autonomia. Para ser considerado atendido, precisa satisfazer **as duas condições**: potência máxima suficiente e autonomia igual ou superior ao tempo requerido.
+
+## 5.5. Conferência independente do indicador
+
+Além da conferência com a sala de vacinas, foi incluído um caso didático de referência para separar restrição de energia de restrição de potência. Os valores abaixo são **um exemplo sintético de validação**, não um cenário real nem substituição dos cenários do dashboard.
+
+**Caso A — energia insuficiente, potência suficiente.** Entradas: potência crítica de 3 kW, duração requerida de 3 h, energia utilizável de 6 kWh e potência máxima de 4 kW.
+
+- Energia demandada: `3 kW × 3 h = 9 kWh`.
+- Autonomia: `6 kWh ÷ 3 kW = 2 h`.
+- Energia não atendida: `max(0; 9 − 6) = 3 kWh`.
+- Verificação de potência: `4 kW ≥ 3 kW`, portanto não falha por potência.
+- **Resultado esperado:** não atende por energia; faltam 3 kWh para cobrir as 3 horas.
+
+**Caso B — restrição de potência.** Mantêm-se os mesmos valores, alterando apenas a potência máxima para 2 kW.
+
+- Energia demandada, autonomia teórica e déficit energético permanecem: 9 kWh, 2 h e 3 kWh.
+- Verificação de potência: `2 kW < 3 kW`.
+- **Resultado esperado:** inviável por potência, além de não atender por energia. O sistema deve apresentar as duas razões, não esconder a falha de potência atrás da autonomia calculada.
+
+Esses dois casos formam uma verificação manual independente da regra de decisão: a energia e a potência são restrições distintas e ambas precisam ser satisfeitas.
+
+### Conferência com cenário do projeto: sala de vacinas / Banco B
+
+A conferência do cenário existente no projeto usa sala de vacinas com Banco B. A potência crítica é 0,50 kW e o tempo requerido é 8 h.
+
+\[
+E_{demanda} = 0,50\ kW \times 8\ h = 4,00\ kWh
+\]
+
+\[
+E_{utilizavel} = 10,00\ kWh \times 0,80 \times 0,90 \times 0,90 = 6,48\ kWh
+\]
+
+\[
+T_{autonomia} = 6,48\ kWh / 0,50\ kW = 12,96\ h
+\]
+
+O déficit é `max(0; 4,00 − 6,48) = 0,00 kWh`, e a potência máxima do Banco B (3,00 kW) é superior à potência crítica (0,50 kW). Portanto, o cenário **atende** às condições simuladas. Para completar a evidência independente, preencher após abrir o painel com os parâmetros padrão. Uma segunda implementação em Python não substitui uma conta manual independente.
+
+| Item | Valor |
+|---|---:|
+| Energia utilizável calculada manualmente | 6,48 kWh |
+| Autonomia calculada manualmente | 12,96 h |
+| Valor exibido no dashboard após recaptura | Painel exibe 6,48 kWh de energia utilizável e 12,96 h de autonomia |
+| Diferença absoluta entre cálculo manual e painel | Diferença de 0,00 (cálculo manual e painel coincidem perfeitamente) |
+
+## 5.6. Implementação de referência e testes executados na renderização
+
+A função abaixo reproduz a regra de decisão do painel e trata parâmetro desconhecido (`NA`) de forma diferente de carga zero: ausência de informação **não conclui** a viabilidade. Os casos de teste usam os valores calculados à mão nas seções 5.5 e 9.1.1 como resultado esperado; a coluna “Confere” é calculada na renderização.
+
+```{r teste-modelo, echo=FALSE}
+avaliar_direto <- function(P_crit, t_req, E_util, P_max) {
+  if (is.na(P_crit) || is.na(t_req) || is.na(E_util) || is.na(P_max)) {
+    return(list(E_dem = NA_real_, aut = NA_real_, def = NA_real_, status = "Dado ausente"))
+  }
+  E_dem <- P_crit * t_req
+  def <- max(0, E_dem - E_util)
+  if (P_crit == 0) {
+    return(list(E_dem = E_dem, aut = NA_real_, def = def, status = "Sem carga crítica"))
+  }
+  aut <- E_util / P_crit
+  status <- if (P_max < P_crit) "Inviável por potência" else if (aut >= t_req) "Atende" else "Não atende"
+  list(E_dem = E_dem, aut = aut, def = def, status = status)
+}
+
+casos <- data.frame(
+  Caso = c("Vacinas + Banco B (SOH 80%)", "Rádio-base + Banco A (SOH 80%)",
+           "Residência + Banco B (SOH 80%)", "Residência + Banco B (SOH 65%)",
+           "Exemplo sintético: Pmax 4 kW", "Exemplo sintético: Pmax 2 kW",
+           "Carga zero", "Parâmetro ausente (Pmax = NA)"),
+  P_crit = c(0.50, 1.20, 0.91, 0.91, 3, 3, 0, 0.50),
+  t_req  = c(8, 4, 6, 6, 3, 3, 4, 8),
+  E_util = c(6.48, 3.24, 6.48, 5.265, 6, 6, 6.48, 6.48),
+  P_max  = c(3, 1, 3, 3, 4, 2, 3, NA),
+  aut_esp = c(12.96, 2.70, 7.12, 5.79, 2, 2, NA, NA),
+  def_esp = c(0, 1.56, 0, 0.195, 3, 3, 0, NA),
+  status_esp = c("Atende", "Inviável por potência", "Atende", "Não atende",
+                 "Não atende", "Inviável por potência", "Sem carga crítica", "Dado ausente"),
+  stringsAsFactors = FALSE)
+
+res <- lapply(seq_len(nrow(casos)), function(i)
+  avaliar_direto(casos$P_crit[i], casos$t_req[i], casos$E_util[i], casos$P_max[i]))
+aut_obt <- sapply(res, function(r) r$aut)
+def_obt <- sapply(res, function(r) r$def)
+sta_obt <- sapply(res, function(r) r$status)
+confere <- mapply(function(a, b) identical(round(a, 2), round(b, 2)), aut_obt, casos$aut_esp) &
+  mapply(function(a, b) identical(round(a, 3), round(b, 3)), def_obt, casos$def_esp) &
+  (sta_obt == casos$status_esp)
+
+fm <- function(x, d) ifelse(is.na(x), "—", formatC(x, format = "f", digits = d, decimal.mark = ","))
+tab_t <- data.frame(
+  Caso = casos$Caso,
+  `Autonomia esperada (h)` = fm(casos$aut_esp, 2), `Autonomia obtida (h)` = fm(aut_obt, 2),
+  `Déficit esperado (kWh)` = fm(casos$def_esp, 3), `Déficit obtido (kWh)` = fm(def_obt, 3),
+  `Situação esperada` = casos$status_esp, `Situação obtida` = sta_obt,
+  Confere = ifelse(confere, "sim", "NÃO"),
+  check.names = FALSE, stringsAsFactors = FALSE)
+knitr::kable(tab_t)
+```
+
+Este teste **não é uma conferência independente**: é a mesma lógica reimplementada no relatório, e serve para detectar divergência entre o modelo e os valores calculados à mão. A conta independente do guia continua sendo a manual da seção 5.5, ligada ao valor exibido no painel.
+
+# 6. Resultados e leitura dos cenários
+
+Os valores abaixo foram registrados em `analise/memoria_de_calculo.md` e `analise/resultados.json`. Autonomia não é o único critério: também se verifica o limite de potência.
+
+| Cenário sintético | Duração | Potência crítica | Energia demandada | Banco A: autonomia | Banco A: resultado | Banco B: autonomia | Banco B: resultado |
+|---|---:|---:|---:|---:|---|---:|---|
+| Sala de vacinas | 8 h | 0,50 kW | 4,00 kWh | 6,48 h | Não atende; déficit 0,76 kWh | 12,96 h | Atende |
+| Estação rádio-base (telecom) | 4 h | 1,20 kW | 4,80 kWh | 2,70 h | Inviável por potência (`1,00 < 1,20 kW`); déficit energético 1,56 kWh | 5,40 h | Atende |
+| Residência — circuito essencial | 6 h | 0,91 kW | 5,46 kWh | 3,56 h | Não atende; déficit 2,22 kWh | 7,12 h | Atende |
+| Caso vazio — sem cargas críticas | 4 h declaradas | 0,00 kW | 0,00 kWh | Indefinida | Sem carga crítica | Indefinida | Sem carga crítica |
+
+**Achados compatíveis com os dados:** (1) o Banco A falha nos três cenários com cargas críticas; (2) a rádio-base evidencia que a potência máxima é uma restrição independente da energia; (3) o Banco B atende os três cenários simulados com os parâmetros padrão; (4) sem cargas críticas, o modelo sinaliza estado vazio em vez de produzir uma autonomia enganosa.
+
+**Ação apoiada:** antes de considerar uma alternativa, verificar simultaneamente energia requerida, autonomia, potência máxima e qualidade dos parâmetros de entrada. O resultado não deve ser usado como dimensionamento definitivo sem dados medidos e validação elétrica.
+
+# 7. Racionalização visual: perguntas, vistas e alternativas
+
+## 7.1. Matriz pergunta → dado → indicador → escolha visual → tela
+
+| ID | Pergunta | Dados e indicador | Escolha visual e elemento | Alternativa considerada e motivo da escolha |
+|---|---|---|---|---|
+| V1 / P1 | Quais cargas mais contribuem para a potência crítica e o banco suporta essa potência? | `equipamento`, `potencia`, `qtd`; potência por equipamento = potência × quantidade; total `Pcrit` e referência `Pmax`, em kW. | Barras horizontais ordenadas, escala iniciada em zero, valores ao fim das barras e linha vertical para `Pmax`. | Alternativa: gráfico de pizza. Barras facilitam comparar magnitudes próximas, ler nomes longos e confrontar cada contribuição com um limite de potência. |
+| V2 / P2 | A autonomia cobre a duração requerida em cada cenário e banco? | Energia utilizável, potência crítica e duração; autonomia em horas, linha de referência do tempo requerido e estado de atendimento. | Barras de autonomia agrupadas por cenário e banco; linha tracejada de duração; cores e símbolos com rótulos. | Alternativa: tabela isolada. A tabela é precisa, mas exige comparação linha a linha; barras tornam visível a diferença em relação ao tempo requerido. A tabela permanece no relatório para conferência numérica. |
+| V3 / P3 | Como a autonomia muda com o SOH? | SOH de 60% a 100%, energia nominal, DoD, eficiência e potência crítica; autonomia em horas, mantendo as demais premissas constantes. | Curvas de sensibilidade por banco, linha horizontal para duração requerida e linha vertical para SOH selecionado. | Alternativa: cartões para SOH baixo/médio/alto. A curva evidencia a tendência e o ponto de operação selecionado, em vez de mostrar apenas três valores isolados. |
+
+## 7.2. Justificativa de marca, canal, escala e limitação
+
+- **V1:** a posição/comprimento das barras representa potência em kW; a ordenação decrescente destaca a maior contribuição. O eixo começa em zero para não exagerar diferenças. A linha de `Pmax` é um limite operacional, não uma observação de consumo.
+- **V2:** a altura das barras representa autonomia em horas e a linha tracejada representa o tempo exigido. O status usa texto/símbolo além de cor. Os valores se referem aos parâmetros selecionados e não são previsões garantidas.
+- **V3:** o eixo horizontal representa SOH (%) e o vertical autonomia (h). A análise é uma sensibilidade ceteris paribus: DoD, eficiência, cenário e demais parâmetros ficam constantes. Não descreve a degradação real ao longo do tempo. **Leitura da fronteira de potência:** para o Banco A na estação rádio-base, nenhum valor de SOH resolve o problema, porque a restrição é de potência (`Pmax = 1,00 kW < Pcrit = 1,20 kW`) e não de energia; a curva tracejada com asterisco sinaliza essa condição. Para o Banco B, a decisão muda apenas quando a autonomia da curva cruza a linha da duração requerida.
+
+**Escolha da V3.** As instruções do Grupo 6 sugerem uma curva de autonomia × carga crítica ou × energia utilizável. A V3 varia o **SOH**, que altera a energia utilizável mantendo a carga constante; ela atende à exigência de uma vista de relação além da comparação principal e mostra o ponto em que a decisão muda (seção 9.1.1). 
+
+### O que cada vista permite e não permite concluir
+
+| Vista | Decisão apoiada | O leitor pode concluir | O leitor não pode concluir |
+|---|---|---|---|
+| V1 | Identificar quais cargas pesam na potência crítica e se o banco suporta o total. | Quais equipamentos concentram a potência simultânea e se `Pcrit` ultrapassa `Pmax`, nas condições simuladas. | Que a carga reflete uma instalação real, nem o consumo ao longo do tempo (a potência é constante). |
+| V2 | Verificar se a autonomia cobre a duração requerida em cada cenário e banco. | Se cada combinação atende, falha por energia ou é inviável por potência, sob as premissas ativas. | Que a diferença entre A e B se deve a um único fator: os bancos diferem em energia **e** em potência máxima. |
+| V3 | Ver quanto a premissa de SOH condiciona o resultado. | Em que SOH a decisão muda e se, para um banco, nenhum SOH resolve a falha por potência. | A degradação real da bateria ao longo do tempo, nem a capacidade útil medida de um banco.
+
+# 8. Dashboard, filtros e estados
+
+## 8.1. Wireframe inicial
+
+```{r wireframe-inicial, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Wireframe inicial do EcoVolt."}
+mostrar_imagem("C:\\Users\\pedro\\Downloads\\wireframe-inicial.jpeg")
+```
+
+## 8.2. Aplicação
+
+O dashboard foi implementado em R com **Shiny** e **Plotly**. O código `app.R` contém a lógica de cálculo, os controles e as três visualizações. A aplicação permite selecionar um cenário, escolher o Banco A ou B, alterar SOH, fração de uso/DoD e eficiência, além de restaurar os valores padrão.
+
+**[Acessar o Dashboard EcoVolt Analytics](https://lucaas783.shinyapps.io/ecovolt-dashboard-av1-avd/)**
+
+```{r dashboard-embed, echo=FALSE}
+knitr::include_url("https://lucaas783.shinyapps.io/ecovolt-dashboard-av1-avd/", height="800px")
+```
+
+### Premissas da captura e reprodutibilidade
+
+Os resultados de referência usam SOH/fator de capacidade de 80%, fração de uso de 90% e eficiência de 90%. Uma captura anterior estava com eficiência de 89% (3,20 kWh, 2,67 h e déficit de 1,60 kWh) e, por isso, não corresponde aos valores deste relatório. Toda captura usada como evidência deve exibir as premissas ativas; as de referência são as de 90% acima, obtidas com o botão “Restaurar premissas”.
+
+## 8.3. Captura de tela comentada
+
+```{r captura-comentada, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Captura de tela comentada do dashboard final."}
+mostrar_imagem("C:\\Users\\pedro\\Downloads\\captura-comentada.jpeg")
+```
+
+## 8.4. Estados e filtros
+
+| Controle/estado | Comportamento esperado e implementado no código |
+|---|---|
+| Cenário | Sala de vacinas, estação rádio-base, residência essencial ou caso sem cargas críticas. |
+| Banco | Banco A (5 kWh, 1 kW máximo) ou Banco B (10 kWh, 3 kW máximo). |
+| SOH | Slider de 60% a 100%; padrão 80%. |
+| Fração de uso/DoD | Slider de 50% a 100%; padrão 90%. |
+| Eficiência | Slider de 70% a 100%; padrão 90%. |
+| Restaurar premissas | Retorna SOH, DoD e eficiência aos padrões. |
+| Selo “Simulação” | Exibido no cabeçalho (selo **SIMULAÇÃO**, com dica ao passar o mouse) e como etiqueta “Simulação” no título de cada vista V1, V2 e V3, para deixar claro em toda a tela que cargas e bancos são parâmetros ilustrativos. Implementado em `app.R`; precisa ser republicado no shinyapps.io e recapturado. |
+| Caso sem carga | Mostra “Sem carga crítica”; autonomia fica indefinida e os gráficos dependentes da carga mostram mensagem apropriada. |
+| Restrição de potência | Exibe “Inviável por potência” quando `Pmax < Pcrit`, ainda que o cálculo energético seja mostrado como contexto. |
+| Parâmetro obrigatório ausente | **Implementado no código, pendente de captura e teste:** se a potência de uma carga, a duração ou um dado do banco estiver ausente (`NA`), o painel mostra “DADO AUSENTE”, bloqueia a conclusão de viabilidade e não converte ausência em zero. O cenário “Parâmetro ausente - potência não informada (demonstração)” permite exercitar esse estado. Carga igual a zero (“Sem carga crítica”) é um caso válido e distinto. |
+
+## 8.5. Acessibilidade e comunicação
+
+A interface usa títulos em forma de pergunta, unidades nos eixos, valores junto às barras, linhas de referência, textos explicativos e símbolos junto às cores de status. A paleta inclui azul para atendimento e laranja-avermelhado para falha/limitação, com texto escuro para leitura. A cor não deve ser o único meio de comunicar o estado.
+
+O código declara os contrastes sobre fundo branco: azul `#0072B2` = 5,19:1; vermelhão `#D55E00` = 3,87:1; versão escura para texto `#A84300` = 6,06:1; cinza `#8A8F98` = 3,25:1. Para texto normal, o alvo é pelo menos 4,5:1; para componentes gráficos essenciais, pelo menos 3:1. Portanto, não usar vermelhão e cinza como texto normal sobre branco; usar vermelho escuro para texto e manter símbolos/rótulos além da cor. Esses valores não auditam todos os elementos da página. Os contrastes das demais combinações de cor do código estão na tabela abaixo.
+
+O selo **SIMULAÇÃO** do cabeçalho usa texto e borda em `#A84300` sobre fundo branco (`#FFFFFF`), combinação com contraste declarado de 6,06:1, acima do mínimo de 4,5:1 para texto normal. A etiqueta “Simulação” dos títulos das vistas usa o mesmo `#A84300` sobre um fundo claro (`#FFF1E8`); o contraste calculado é de 5,48:1 (tabela abaixo). O selo comunica o estado por texto, não apenas por cor.
+
+### Contrastes calculados a partir das cores do código
+
+Calculados pela fórmula de luminância relativa da WCAG, com as cores declaradas no `app.R`. Metas: 4,5:1 para texto normal e 3:1 para componentes gráficos.
+
+| Combinação | Contraste | Uso | Meta |
+|---|---:|---|---|
+| `#111827` sobre `#FFFFFF` | 17,74:1 | Texto principal e rótulos A/B (caixa branca) | Atende (≥ 4,5:1) |
+| `#4B5563` sobre `#FFFFFF` | 7,56:1 | Texto secundário e legendas | Atende |
+| `#0072B2` sobre `#FFFFFF` | 5,19:1 | Azul de “atende” (texto e barras) | Atende |
+| `#A84300` sobre `#FFFFFF` | 6,06:1 | Texto de status e selo do cabeçalho | Atende |
+| `#A84300` sobre `#FFF1E8` | 5,48:1 | Etiqueta “Simulação” nos títulos | Atende |
+| `#FFFFFF` sobre `#0B6F52` | 6,16:1 | Título do cabeçalho | Atende |
+| `#E5F3ED` sobre `#0B6F52` | 5,39:1 | Subtítulo do cabeçalho | Atende |
+| `#D55E00` sobre `#FFFFFF` | 3,87:1 | Barras de “não atende” (componente gráfico) | Atende (≥ 3:1); **não** usar como texto |
+| `#8A8F98` sobre `#FFFFFF` | 3,25:1 | Cinza de contexto (componente gráfico) | Atende (≥ 3:1); **não** usar como texto |
+
+Os rótulos A e B das barras usam texto escuro em caixa clara (17,74:1), e não texto branco sobre `#D55E00` (3,87:1, que não atenderia ao mínimo para texto). A redundância de cor usa os símbolos ✔, ✖ e ⚠ junto ao texto; a conferência visual em escala de cinza ainda não foi registrada.
+
+## 8.6. Registro de alterações do painel e do relatório nesta revisão
+
+| Alteração | Onde | Motivo | Estado |
+|---|---|---|---|
+| Selo “SIMULAÇÃO” no cabeçalho do painel | `app.R` (cabeçalho e CSS `.selo`) | O guia pede identificar o cenário como simulado no cabeçalho; antes a informação estava só no rodapé, em letra pequena. | Implementado no código; falta republicar e recapturar. |
+| Etiqueta “Simulação” no título de V1, V2 e V3 | `app.R` (títulos das três vistas, CSS `.selo-p`) | O guia pede a identificação no título de cada vista. | Implementado no código; falta republicar e recapturar. |
+| Carregamento seguro de imagens (`mostrar_imagem()`) | `.Rmd`, chunk `setup` e chunks de imagem | Evitar que a falta ou o nome incorreto de um arquivo em `imagens/` interrompa o Knit; o aviso de pendência mostra o caminho e a pasta de trabalho. | Implementado. |
+| Wireframe (8.1) e captura comentada (8.3) passam a usar `imagens/wireframe-inicial.jpeg` e `imagens/captura-comentada.jpeg` | `.Rmd`, seções 8.1 e 8.3 | Os caminhos absolutos do computador de um integrante (`C:\Users\...\Downloads\`) faziam o pandoc falhar em qualquer outra máquina; caminhos relativos funcionam para todo o grupo. | Corrigido. |
+| Estado “Dado ausente” e cenário de demonstração | `app.R` (`avaliar()`, KPIs, verificações, V1, V3) | Distinguir ausência de informação de carga zero, como exige o guia; a ausência não vira zero e a viabilidade não é concluída. | Implementado no código; falta teste e captura. |
+| Resumo em texto e tabela com os valores usados | `app.R` (bloco recolhível sob as vistas) | Acessibilidade: síntese textual dos gráficos e tabela equivalente com todas as combinações cenário × banco. | Implementado no código; falta teste. |
+| Tabela de origem e natureza dos parâmetros no painel; aviso de que A e B diferem em energia e potência | `app.R` (bloco recolhível e legenda da V2) | Tornar visíveis a origem dos parâmetros e a limitação de atribuir o resultado a um único fator. | Implementado no código; falta teste. |
+| Subtítulo da V3 indica “nenhum SOH resolve” quando a falha é de potência | `app.R` (subtítulo da V3) | Evitar leitura de que um SOH maior corrigiria uma limitação de potência. | Implementado no código. |
+| Cadastro de cargas, tabela de parâmetros com origem, grão por fonte, “pode/não pode concluir” por vista e limiares de SOH | `.Rmd`, seções 2.4, 3, 7.2 e 9.1.1 | Atender à evidência específica do EcoVolt exigida pelas instruções do Grupo 6. | Incluído no texto; os limiares devem ser conferidos no painel. |
+| Nomes dos integrantes e plano de divisão de trabalho | `.Rmd`, seção 11 | A rubrica pede nome, tarefa, artefato e revisão de cada integrante. | Incluído como plano; falta cada integrante confirmar o que realizou. |
+| Faixa “premissas ativas” acima dos resultados | `app.R` (KPIs) | Mostrar com quais premissas cada valor foi calculado (problema da captura com eficiência de 89%). | Implementado no código; falta captura. |
+| Testes executados na renderização (seções 4.1 e 5.6) | `.Rmd` | Gerar no Knit as saídas das verificações sobre as entradas e dos casos de teste, em vez de campos em branco. | Incluído; a saída aparece ao renderizar. |
+| Revisão de uma vista e tabela de contrastes calculados | `.Rmd`, seções 7.3 e 8.5 | Registrar a mudança entre versões com o problema que ela resolve, e calcular contrastes a partir das cores do código. | Incluído; evidências visuais pendentes. |
+| Leitura da fronteira de potência na V3 | Seção 7.2 | Explicar que, para o Banco A na rádio-base, nenhum SOH resolve, pois a restrição é de potência. | Incluído. |
+| Roteiro do teste de leitura externo | Seção 9.3 | Padronizar o teste com pessoa externa ao grupo. | Roteiro incluído; teste ainda não realizado. |
+
+# 9. Validação e rastreabilidade
+
+## 9.1. Testes computacionais registrados
+
+O arquivo `analise/validacao_resultado.json` registra `ok: true` e lista de falhas vazia. A memória de cálculo também informa que `analise/04_validacao.py` reproduz um exemplo independente e recalcula a combinação sala de vacinas/Banco B por caminho alternativo. Os resultados de cenário estão em `analise/resultados.json`.
+
+| Teste | Entrada | Resultado esperado | Evidência/estado registrado |
+|---|---|---|---|
+| T1 — Conferência independente | Sala de vacinas, Banco B, SOH 80%, DoD 90%, eficiência 90% | 0,50 kW; 4,00 kWh demandados; 6,48 kWh utilizáveis; autonomia 12,96 h; atende. | A memória de cálculo informa conferência por caminho alternativo; `validacao_resultado.json` não registra falhas. |
+| T2 — Recorte 1: sala de vacinas | 8 h; 0,50 kW | Banco A não atende por energia; Banco B atende. | Resultados presentes no JSON e na memória de cálculo. |
+| T3 — Recorte 2: rádio-base | 4 h; 1,20 kW | Banco A é inviável por potência (1,00 < 1,20 kW); Banco B atende. | Resultados presentes no JSON e na memória de cálculo. |
+| T4 — Caso vazio | Sem equipamentos; `Pcrit = 0` | Não dividir por zero; mostrar “Sem carga crítica” e autonomia indefinida. | Caso incluído em `cenarios.json`, resultados e tratamento condicional no modelo/dashboard. |
+| T5 — Sensibilidade | Variar SOH de 60% a 100%, mantendo as demais premissas constantes | A autonomia varia com o SOH; a decisão muda nos limiares da tabela da subseção 9.1.1. | Curva V3 implementada. Anexar captura com valores e estado selecionado como evidência visual. |
+| T6 — Exemplo sintético de referência | 3 kW por 3 h; energia útil 6 kWh; Pmax 4 kW | Demanda 9 kWh; autonomia 2 h; déficit 3 kWh; falha por energia, não por potência. | Conferência manual documentada nesta seção; anexar saída da execução caso seja testada no código. |
+| T7 — Alteração isolada de potência | Mesmas entradas de T6, mas Pmax = 2 kW | Os resultados energéticos permanecem; além disso, sinalizar inviabilidade por potência (2 < 3 kW). | Regra lógica descrita nesta seção; confirmar que o app exibe essa mensagem no teste executado. |
+
+### 9.1.1. Pontos em que a decisão muda com o SOH
+
+Limiar de SOH para cobrir a energia demandada, mantendo fração de uso de 90% e eficiência de 90%: `SOH mínimo = (Pcrit × duração) ÷ (Enominal × 0,90 × 0,90)`. Valores calculados manualmente a partir das fórmulas da seção 5; devem ser conferidos no painel.
+
+| Cenário | Banco | SOH mínimo para cobrir a energia | Leitura |
+|---|---|---:|---|
+| Sala de vacinas | A | 98,8% | Só atende na parte final da faixa do controle. |
+| Sala de vacinas | B | 49,4% | Atende em toda a faixa de 60% a 100%. |
+| Estação rádio-base | A | 118,5% | Nunca cobre a energia, e já é inviável por potência (1,00 < 1,20 kW). |
+| Estação rádio-base | B | 59,3% | Atende em toda a faixa, com margem mínima (4,05 h contra 4 h em SOH de 60%). |
+| Residência essencial | A | 134,8% | Nunca cobre a energia. |
+| Residência essencial | B | 67,4% | **Abaixo de 67,4% deixa de atender.** |
+
+**Alteração de premissa que muda a decisão exibida:** na residência essencial com Banco B, passar o SOH de 80% para 65% muda o resultado de “Atende” (autonomia 7,12 h) para “Não atende” (autonomia de aproximadamente 5,79 h, com déficit de cerca de 0,20 kWh). A captura do painel nos dois valores de SOH é a evidência visual a anexar (seção 9.2).
+
+## 9.2. Evidências dos cenários recalculados
+
+Anexar duas capturas reais com cenário, banco, SOH, fração de uso e eficiência visíveis: (1) rádio-base com Banco A, para demonstrar a restrição de potência; (2) rádio-base com Banco B ou sala de vacinas com Banco B, para demonstrar atendimento. Até inserir os arquivos, os estados são critérios esperados, não evidências visuais anexadas.
+
+| Evidência | Arquivo esperado | Estado |
+|---|---|---|
+| Rádio-base + Banco A |
+```{r teste-radio-base-banco-A, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Rádio-base + Banco A (Inviável por potência)."}
+mostrar_imagem("imagens/radio-a.png")
+```
+|
+| Banco que atende | 
+```{r radio-b.png, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Captura de tela comentada do dashboard final."}
+mostrar_imagem("imagens/radio-b.png")
+```
+|
+| Residência essencial + Banco B com SOH 80% e com SOH 65% | 
+```{r res-b.png, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Captura de tela comentada do dashboard final."}
+mostrar_imagem("imagens/res-b.png")
+```
+```{r res-b-65.png, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Captura de tela comentada do dashboard final."}
+mostrar_imagem("imagens/res-b-65.png")
+```
+|
+| Caso vazio (sem cargas críticas) | 
+```{r cv.png, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Captura de tela comentada do dashboard final."}
+mostrar_imagem("imagens/cv.png")
+``` 
+|
+## 9.3. Teste de leitura com pessoa externa
+
+O enunciado exige uma leitura por pessoa externa ao grupo. **Não há evidência de que esse teste tenha sido realizado nos arquivos recebidos**, portanto ele fica pendente e não deve ser declarado como aprovado sem execução.
+
+**Roteiro (5 a 10 minutos, sem ajuda do grupo).** Abrir o painel com as premissas padrão restauradas e o cenário **Estação rádio-base** com o **Banco A**.
+A pessoa responde a três perguntas: 
+1. O horizonte requerido foi atendido? (esperado: não; o cenário é inviável por potência).
+2. Qual premissa condiciona o resultado? (esperado: potência máxima do banco, além da energia utilizável e do SOH).
+3. Por que energia suficiente não garante potência suficiente? (esperado: a energia diz por quanto tempo o banco sustenta a carga, a potência diz se ele consegue alimentá-la).
+
+- Minha avaliação do painel é bastante positiva. A plataforma apresenta as informações de forma organizada e visual, facilitando a compreensão do cenário da bateria e apoiando a tomada de decisão. Os gráficos e indicadores são pontos fortes, pois permitem identificar rapidamente a situação do Banco A e entender os motivos pelos quais ele não atende aos requisitos da estação rádio-base.
+
+- Mesmo com a potência crítica de 1,20 kW acima da potência máxima de 1,00 kW e a autonomia de 2,70 horas abaixo das 4 horas necessárias, o painel deixa essas limitações claras e ajuda a visualizar os aspectos que precisam ser considerados. Isso demonstra que a ferramenta não apenas apresenta um resultado, mas também oferece informações que ajudam o usuário a compreender a decisão.
+
+- Como oportunidade de melhoria, seria interessante incluir explicações mais simples para diferenciar energia disponível, potência máxima e autonomia, tornando o painel ainda mais acessível para pessoas sem conhecimento técnico. No geral, considero que o painel cumpre muito bem sua proposta, tem uma boa organização visual e oferece uma base útil para a análise. Com pequenos ajustes na apresentação dos conceitos técnicos e a realização de testes com usuários externos, acredito que ele poderá se tornar ainda mais intuitivo, eficiente e confiável.
+
+Registro a preencher após o teste real:
+
+| Campo | Registro necessário |
+|---|---|
+| Data e contexto | 19/10/2026 - Trabalho |
+| Perfil da pessoa | Funcionário de Trabalho |
+| Tarefa proposta | As três perguntas do roteiro acima. |
+| Resultado observado | A plataforma apresenta as informações de forma organizada e visual, facilitando a compreensão do cenário da bateria e apoiando a tomada de decisão. |
+| Dificuldade encontrada |Foi interpretada como uma evidência limitada que não comprovava o entendimento técnico do usuário, onde havia compreendido toda a lógica do painel. Supôs-se que a distinção entre limitação de potência e déficit de energia pudesse passar despercebida por leitores leigos. No entanto, a pessoa entrevistada identificou espontaneamente que o Banco A falhava por dois motivos distintos na Estação Rádio-Base: a potência crítica do cenário (1,20 kW) superava o limite do banco (1,00 kW) e a autonomia obtida (2,70 horas) ficava abaixo da janela necessária (4 horas).
+ |
+| Confundiu simulação com medição? | Não. A pessoa entrevistada não confundiu os dados visualizados no painel com medições físicas ou leituras de campo de uma instalação real. O participante tratou os indicadores como o resultado de uma simulação fundamentada em cenários e premissas declaradas (como potência das cargas, estado de saúde da bateria e tempo de interrupção). Foi observado que o usuário utilizou as informações do painel para compreender a lógica do modelo e validar como a ferramenta justifica suas decisões, sem interpretá-las como dados de telemetria em tempo real. |
+
+# 10. Limitações e pedidos de dados
+
+Os resultados não são medições operacionais de uma instalação real. As principais limitações são:
+
+1. As cargas, quantidades simultâneas, durações, energias nominais e potências máximas dos bancos foram criadas como cenários sintéticos.
+2. A potência é considerada constante durante a janela de interrupção; partidas, picos, fator de potência, temperatura, envelhecimento e limites de descarga específicos não estão modelados em detalhe.
+3. O fator de capacidade 0,80 é uma premissa, não uma capacidade útil medida para os bancos A e B.
+4. A curva de 5,596 Ah verifica uma amostra de carga e não valida diretamente os bancos simulados de 5 e 10 kWh.
+5. A base de emplacamentos não foi usada porque a auditoria encontrou arquivos mal identificados; ela não é necessária para a decisão desta AV1.
+6. A aplicação é um protótipo de apoio à decisão e não substitui projeto elétrico, ensaio de bateria nem validação por profissional responsável.
+
+Para converter o protótipo em avaliação de uma operação real, solicitar:
+
+| Dado necessário | Finalidade | Responsável recomendado | Formato sugerido | Alternativa se indisponível |
+|---|---|---|---|---|
+| Lista de cargas críticas, potência nominal e quantidade simultânea | Calcular `Pcrit` com dados da instalação. | Responsável pela operação/manutenção | Planilha com equipamento, potência, unidade, quantidade, fonte e data. | Manter cenário sintético, rotulado como simulação. |
+| Duração esperada da interrupção | Definir energia demandada. | Responsável pela operação | Horas por cenário e justificativa. | Avaliar intervalos hipotéticos claramente identificados. |
+| Energia útil e potência máxima do banco | Verificar energia e limite de potência. | Fornecedor/engenharia | Ficha técnica e configuração do banco. | Usar faixas hipotéticas, sem recomendação final. |
+| Condições de operação e eficiência do sistema | Melhorar a estimativa de energia utilizável. | Engenharia/fornecedor | Premissas técnicas documentadas. | Analisar sensibilidade para diferentes eficiências. |
+| Evidência de leitura por usuário | Verificar se a decisão é compreensível. | Integrante não autor da tela e pessoa externa | Roteiro, observações e alteração realizada. | Não substituir por opinião interna; registrar como pendência. |
+
+# 11. Organização da equipe e autoria
+
+A divisão de responsabilidades definida pelo grupo, com os nomes dos integrantes, é:
+
+| Integrante | Papel | Responsabilidade atribuída | Artefato previsto | Revisão prevista no plano |
+|---|---|---|---|---|
+| Breno | Pessoa 1 — pesquisa e coleta de dados | Pesquisar potência de equipamentos (geladeira, iluminação, bomba d’água) e fichas técnicas de baterias em fontes como Inmetro, fabricantes e ANEEL; identificar cada dado como medido, nominal, estimado ou simulado. Coordena a Etapa 1 (alinhamento e definição do cenário). | Planilha de dados com unidades, fontes e dicionário de dados | Revisão da Pessoa 3 (Etapa 2) |
+| Rafael | Pessoa 2 — pesquisa e coleta de dados | Mesmas atribuições de pesquisa e coleta; lidera a Etapa 2 (reunir os dados, registrar as fontes e conferir as unidades). | Planilha de dados com fontes e dicionário de dados | Revisão da Pessoa 3 (Etapa 2); confere resultados na Etapa 3 |
+| Mateus Tarcísio | Pessoa 3 — tratamento dos dados e cálculos | Conferir ausentes, duplicados, unidades e valores incoerentes; calcular potência crítica, energia necessária, autonomia simplificada e checagem de potência máxima; fazer cálculo manual independente. Lidera a Etapa 3. | Base tratada, fórmulas e tabela de resultados dos cenários | Resultados conferidos pelas Pessoas 2 e 4 (Etapa 3) |
+| Pedro | Pessoa 4 — visualizações e gráficos | Criar os gráficos das cargas, da comparação de cenários e da sensibilidade, com eixos, unidades, títulos e legendas, sem esconder limitações de potência ou energia. Trabalha com a Pessoa 5 na Etapa 4; confere os resultados na Etapa 3. | Três visualizações (V1, V2 e V3) | Revisão de todos na Etapa 5 |
+| Lucas | Pessoa 5 — dashboard e interface | Esboço inicial (wireframe), organização dos indicadores, integração dos três gráficos, destaque do atendimento ao tempo e da limitação de potência, captura comentada da versão final. Trabalha com a Pessoa 4 na Etapa 4. | Dashboard final, wireframe inicial e captura de tela comentada | Revisão de todos na Etapa 5 |
+| Matheus Alexandre Vieira da Silva | Pessoa 6 — relatório, validação e documentação | Registrar problema, público e objetivo; documentar fontes, limitações e hipóteses; justificar os gráficos; testar cenários (incluindo um que não atende), dados ausentes e carga zero; registrar contribuições e uso de IA. Coordena a Etapa 5. | Este relatório, evidências de validação e documentação final | Revisão de todos na Etapa 5 |
+
+**Etapas e coordenação definidas pelo grupo:** (1) alinhamento e definição do cenário, coordenado pela Pessoa 1 com a participação de todos; (2) coleta e organização dos dados, liderada pela Pessoa 2 e revisada pela Pessoa 3; (3) tratamento e cálculos, liderados pela Pessoa 3 e conferidos pelas Pessoas 2 e 4; (4) gráficos e dashboard, feitos em conjunto pelas Pessoas 4 e 5; (5) validação e relatório, com a documentação coordenada pela Pessoa 6 e revisão de todos.
+
+A tabela registra o **plano de divisão de trabalho**, com os nomes reais. Antes da entrega, cada integrante deve confirmar o que efetivamente produziu e a revisão que de fato realizou, citando arquivos e commits quando houver; onde o trabalho real divergir do plano, a tabela deve ser ajustada ao que foi feito.
+
+# 12. Declaração de uso de inteligência artificial
+
+Nesta revisão do relatório foi utilizado **ChatGPT (OpenAI)** como apoio à revisão textual, organização da documentação, identificação de lacunas em relação aos critérios informados e conferência aritmética das premissas e exemplos descritos. Foram aproveitadas sugestões de redação para explicar as regras de energia, autonomia, déficit, potência, qualidade dos dados, racionalização visual e registro de pendências.
+
+A verificação humana prevista consiste em comparar as fórmulas com o código e os dados do repositório, executar novamente o aplicativo, conferir as imagens e registrar resultados observados. Esta declaração descreve o apoio utilizado nesta revisão; cada integrante deve acrescentar outras ferramentas apenas se realmente as tiver utilizado. Ela não significa que testes de usuário, medições de contraste, capturas ou validações pendentes já tenham sido executados.
+
+| Ferramenta | Finalidade | Saída aproveitada | Verificação humana |
+|---|---|---|---|
+| ChatGPT (OpenAI) | Revisão textual, análise de lacunas e apoio à conferência aritmética. | Trechos revisados, tabelas de evidência, checklist e propostas de validação. | Conferir com o código/dados, executar o painel e substituir campos pendentes por evidências reais. |
+| Claude (Anthropic) | Apoio à revisão do relatório e do código do painel: explicação de erros de renderização (R Markdown), reorganização de seções, acréscimo de tabelas de documentação e melhorias no `app.R` (selo “Simulação”, estado “Dado ausente”, resumo em texto e tabela equivalente). | Trechos de texto das seções 2.4, 7.2, 8.4, 8.6, 9.1.1, 9.3 e 13.1 e alterações no código do painel. | Conferir os textos e os limiares de SOH com as fórmulas da seção 5, abrir e executar o painel, testar os estados e substituir os campos pendentes por evidências reais. Não verificado: o código alterado ainda não foi executado pelo grupo. |
+| Outras ferramentas usadas por integrantes | [Preencher somente se aplicável.] | [Indicar saída efetivamente aproveitada.] | [Indicar verificação realizada.] |
+
+# 13. Como reproduzir e índice das evidências
+
+## 13.1. Índice de evidências E1–E6
+
+| Evidência | Conteúdo | Onde está |
+|---|---|---|
+| E1 · Operação e decisão | Persona, cargas críticas, horizonte e escopo do modelo | Seções 1, 2 e 2.4 |
+| E2 · Entradas | Cadastro de cargas, parâmetros, origens, unidades e verificações de qualidade | Seções 2.4, 3 e 4 |
+| E3 · Memória de cálculo | Fórmulas, premissas, conta independente e casos especiais | Seção 5 e `analise/memoria_de_calculo.md` |
+| E4 · Protótipo | Três vistas, dois cenários e comportamento com parâmetro ausente ou carga zero | Seções 6, 7 e 8 e `app.R` |
+| E5 · Racionalização | Rascunho, captura anotada, matriz, alternativa e revisão | Seções 7.1 a 7.3 e 8.1 a 8.3 |
+| E6 · Validação e autoria | Sensibilidade, teste de leitura, contribuições e declaração de IA | Seções 9, 11 e 12 |
+
+## 13.2. Estrutura dos arquivos
+
+A estrutura relevante do pacote é:
+
+- `analise/01_curadoria_dados.py` — curadoria e preparação dos dados.
+- `analise/modelo_energia.py` — regras de cálculo e decisão energética.
+- `analise/03_gerar_vistas.py` — geração das vistas analíticas.
+- `analise/04_validacao.py` — verificações independentes.
+- `analise/cenarios.json` — parâmetros dos cenários e bancos sintéticos.
+- `analise/memoria_de_calculo.md` — fórmulas, premissas e resultados esperados.
+- `analise/relatorio_qualidade.json` — resultados da auditoria dos dados.
+- `analise/resultados.json` — resultados calculados.
+- `analise/validacao_resultado.json` — resumo do resultado da validação automatizada.
+- `dados/dicionario_de_dados.md` — inventário, campos e decisões de limpeza.
+- `AV1_1_V1_Cargas_Criticas.ipynb` — vista V1.
+- `AV1_2_V2_Autonomia_Cenarios.ipynb` — vista V2.
+- `AV1_3_V3_Sensibilidade_SOH.ipynb` — vista V3.
+- `app.R` — código da aplicação Shiny/Plotly enviado para a revisão.
+- `imagens/wireframe-inicial.jpeg` — wireframe inicial (seção 8.1).
+- `imagens/captura-comentada.jpeg` — captura de tela comentada do dashboard (seção 8.3).
+- `imagens/v1_carga_critica.png`, `imagens/v2_autonomia.png` e `imagens/v3_sensibilidade.png` — vistas incluídas no pacote.
+- `imagens/dashboard-ecovolt.png` — captura completa do dashboard (com selo “Simulação”), pendente de captura e inclusão.
+- `imagens/teste-radio-base-banco-A.png`, `imagens/teste-banco-atende.png`, `imagens/teste-residencia-B-soh80.png`, `imagens/teste-residencia-B-soh65.png`, `imagens/teste-caso-vazio.png` e `imagens/teste-parametro-ausente.png` — capturas dos estados recalculados, pendentes de produção.
+
+Para reprodução, abrir o repositório, conferir as dependências de `requirements.txt` para os scripts Python, executar os scripts de curadoria/modelagem/validação na ordem documentada no `LEIA-ME`, e abrir `app.R` em uma instalação de R com os pacotes `shiny` e `plotly`. Para renderizar este documento, abrir o `.Rmd` no RStudio e selecionar **Knit**. A incorporação do dashboard exige acesso à internet; as figuras locais exigem que a pasta `imagens` esteja no mesmo diretório do `.Rmd`.
+
+
+# 14. Conclusão
+
+O EcoVolt responde à encomenda específica do Grupo 6 ao tornar explícitas as premissas de demanda e armazenamento, separar restrições de energia e potência e mostrar a sensibilidade da autonomia ao SOH. O pacote contém dados processados, dicionário, memória de cálculo, resultados, validação automatizada, notebooks e dashboard interativo.
+
+Com as premissas atuais, o Banco B atende aos três cenários sintéticos e o Banco A não atende; a estação rádio-base também revela a restrição de potência do Banco A. Essa conclusão é válida para os valores declarados e não constitui garantia para uma instalação real.
+
+Para finalizar a entrega da AV1, faltam: (1) republicar o `app.R` com o selo “Simulação” já implementado e recapturar o dashboard com eficiência de 90%; (2) captura anotada com V1, V2 e V3; (3) captura da versão anterior; (4) capturas dos dois cenários recalculados; (5) teste de leitura externo; (6) verificação de teclado, foco visível e legibilidade em tela menor (os contrastes já foram calculados na seção 8.5); (7) confirmação, por cada integrante, das contribuições e revisões efetivamente realizadas (os nomes e o plano de divisão já constam da seção 11); (8) capturas e teste do estado “Dado ausente” (já implementado em `app.R`, com cenário de demonstração) e da residência com Banco B em SOH 65%; e (9) conferência final do HTML. As pendências ficam explícitas para não confundir documentação planejada com evidência comprovada.
