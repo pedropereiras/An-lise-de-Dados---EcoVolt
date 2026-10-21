@@ -1,4 +1,4 @@
-# ENGENHARIA E ANÁLIDE DE DADOS
+# ANÁLIDE DE DADOS
 <div align="center">
 
 # EcoVolt Analytics repository
@@ -13,5 +13,7 @@
 - <a href="https://www.github.com/pedropereiras">Pedro Pereira</a>
 - <a href="https://www.github.com/MateusTarcisio">Mateus Tarcísio</a>
 - <a href="https://www.github.com/BrenoNeves-IA">Breno Neves</a>
+- <a href="https://www.github.com/matheusalexandre">Matheus Alexandre</a>
+- Rafael Brito
 
-Former members: Daniel Lucas, Romeu Alves, Theo Pessoa
+
